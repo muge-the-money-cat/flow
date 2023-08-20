@@ -10,10 +10,10 @@ import (
 	"github.com/muge-the-money-cat/flow/testutils"
 )
 
-func TestPostSubtotalWithNoParent(t *testing.T) {
+func TestSubtotal(t *testing.T) {
 	var (
 		testSuite = godog.TestSuite{
-			ScenarioInitializer: initScenarioPostSubtotalWithNoParent,
+			ScenarioInitializer: initialiseSubtotalScenarios,
 			Options:             testutils.GodogOptions,
 		}
 	)
@@ -25,7 +25,7 @@ func TestPostSubtotalWithNoParent(t *testing.T) {
 	return
 }
 
-func initScenarioPostSubtotalWithNoParent(ctx *godog.ScenarioContext) {
+func initialiseSubtotalScenarios(ctx *godog.ScenarioContext) {
 	ctx.Step(`^there is a Subtotal API$`,
 		thereIsASubtotalAPI,
 	)
@@ -34,6 +34,15 @@ func initScenarioPostSubtotalWithNoParent(ctx *godog.ScenarioContext) {
 	)
 	ctx.Step(`^there should be a Subtotal with name "(.+)" and no parent$`,
 		thereShouldBeASubtotalWithNoParent,
+	)
+	ctx.Step(`^there is a Subtotal with name "(.+)"$`,
+		thereIsASubtotal,
+	)
+	ctx.Step(`^we POST a Subtotal with name "(.+)" and parent "(.+)"$`,
+		postASubtotalWithParent,
+	)
+	ctx.Step(`^there should be a Subtotal with name "(.+)" and parent "(.+)"$`,
+		thereShouldBeASubtotalWithParent,
 	)
 
 	return
@@ -98,8 +107,83 @@ func thereShouldBeASubtotalWithNoParent(
 	}
 
 	e = testutils.Verify(assert.Equal,
-		false,
-		subtotal.HasParent(),
+		nil,
+		subtotal.Parent(),
+	)
+	if e != nil {
+		return
+	}
+
+	return
+}
+
+func thereIsASubtotal(parentContext context.Context, name string) (
+	childContext context.Context, e error,
+) {
+	childContext, e = postASubtotalWithNoParent(parentContext, name)
+	if e != nil {
+		return
+	}
+
+	return
+}
+
+func postASubtotalWithParent(
+	parentContext context.Context, name string, parentName string,
+) (
+	childContext context.Context, e error,
+) {
+	var (
+		parent   Subtotal
+		subtotal Subtotal
+	)
+
+	childContext = parentContext
+
+	parent, e = childContext.Value(subtotalAPIContextKey{}).(SubtotalAPI).
+		GetByName(parentName)
+	if e != nil {
+		return
+	}
+
+	subtotal = NewSubtotalWithParent(name, parent)
+
+	e = childContext.Value(subtotalAPIContextKey{}).(SubtotalAPI).Post(subtotal)
+	if e != nil {
+		return
+	}
+
+	return
+}
+
+func thereShouldBeASubtotalWithParent(
+	parentContext context.Context, name string, parentName string,
+) (
+	childContext context.Context, e error,
+) {
+	var (
+		subtotal Subtotal
+	)
+
+	childContext = parentContext
+
+	subtotal, e = childContext.Value(subtotalAPIContextKey{}).(SubtotalAPI).
+		GetByName(name)
+	if e != nil {
+		return
+	}
+
+	e = testutils.Verify(assert.Equal,
+		name,
+		subtotal.Name(),
+	)
+	if e != nil {
+		return
+	}
+
+	e = testutils.Verify(assert.Equal,
+		parentName,
+		subtotal.Parent().Name(),
 	)
 	if e != nil {
 		return

@@ -6,12 +6,12 @@ import (
 
 type Subtotal interface {
 	Name() string
-	HasParent() bool
+	Parent() Subtotal
 }
 
 type subtotal struct {
-	name     string
-	parentID int
+	name   string
+	parent Subtotal
 }
 
 func NewSubtotalWithNoParent(name string) (s *subtotal) {
@@ -22,12 +22,21 @@ func NewSubtotalWithNoParent(name string) (s *subtotal) {
 	return
 }
 
+func NewSubtotalWithParent(name string, parent Subtotal) (s *subtotal) {
+	s = &subtotal{
+		name:   name,
+		parent: parent,
+	}
+
+	return
+}
+
 func (s *subtotal) Name() string {
 	return s.name
 }
 
-func (s *subtotal) HasParent() bool {
-	return s.parentID != 0
+func (s *subtotal) Parent() Subtotal {
+	return s.parent
 }
 
 type SubtotalAPI interface {
