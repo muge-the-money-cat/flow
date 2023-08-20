@@ -2,32 +2,24 @@ package main
 
 import (
 	"context"
-	"fmt"
-	"os"
 	"testing"
 
 	"github.com/cucumber/godog"
-	"github.com/cucumber/godog/colors"
 	"github.com/stretchr/testify/assert"
+
+	"github.com/muge-the-money-cat/flow/testutils"
 )
 
 func TestPostSubtotalWithNoParent(t *testing.T) {
 	var (
 		testSuite = godog.TestSuite{
 			ScenarioInitializer: initScenarioPostSubtotalWithNoParent,
-			Options: &godog.Options{
-				Output: colors.Colored(os.Stdout),
-				Format: "pretty",
-			},
+			Options:             testutils.GodogOptions,
 		}
-
-		status int
 	)
 
-	status = testSuite.Run()
-
-	if status != 0 {
-		os.Exit(status)
+	if testSuite.Run() != 0 {
+		t.Fatal()
 	}
 
 	return
@@ -97,7 +89,7 @@ func thereShouldBeASubtotalWithNoParent(
 		return
 	}
 
-	e = verify(assert.Equal,
+	e = testutils.Verify(assert.Equal,
 		name,
 		subtotal.Name(),
 	)
@@ -105,7 +97,7 @@ func thereShouldBeASubtotalWithNoParent(
 		return
 	}
 
-	e = verify(assert.Equal,
+	e = testutils.Verify(assert.Equal,
 		false,
 		subtotal.HasParent(),
 	)
@@ -119,27 +111,3 @@ func thereShouldBeASubtotalWithNoParent(
 type (
 	subtotalAPIContextKey struct{}
 )
-
-// TODO: make package
-
-func verify(assertion assertionFunc, expected, actual interface{}) (e error) {
-	var (
-		t tee
-	)
-
-	assertion(&t, expected, actual)
-
-	return t.e
-}
-
-type assertionFunc func(
-	t assert.TestingT, expected, actual interface{}, msgAndArgs ...interface{},
-) bool
-
-type tee struct {
-	e error
-}
-
-func (t *tee) Errorf(format string, args ...interface{}) {
-	t.e = fmt.Errorf(format, args...)
-}
