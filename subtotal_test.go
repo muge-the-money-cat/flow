@@ -67,13 +67,7 @@ func postASubtotalWithNoParent(parentContext context.Context, name string,
 ) (
 	childContext context.Context, e error,
 ) {
-	var (
-		subtotal Subtotal = NewSubtotalWithNoParent(name)
-	)
-
-	childContext = parentContext
-
-	e = childContext.Value(subtotalAPIContextKey{}).(SubtotalAPI).Post(subtotal)
+	childContext, e = postASubtotal(parentContext, name, nullParentName)
 	if e != nil {
 		return
 	}
@@ -86,29 +80,9 @@ func thereShouldBeASubtotalWithNoParent(
 ) (
 	childContext context.Context, e error,
 ) {
-	var (
-		subtotal Subtotal
-	)
-
-	childContext = parentContext
-
-	subtotal, e = childContext.Value(subtotalAPIContextKey{}).(SubtotalAPI).
-		GetByName(name)
-	if e != nil {
-		return
-	}
-
-	e = testutils.Verify(assert.Equal,
+	childContext, e = thereShouldBeASubtotal(parentContext,
 		name,
-		subtotal.Name(),
-	)
-	if e != nil {
-		return
-	}
-
-	e = testutils.Verify(assert.Equal,
-		nil,
-		subtotal.Parent(),
+		nullParentName,
 	)
 	if e != nil {
 		return
@@ -133,20 +107,48 @@ func postASubtotalWithParent(
 ) (
 	childContext context.Context, e error,
 ) {
-	var (
-		parent   Subtotal
-		subtotal Subtotal
-	)
-
-	childContext = parentContext
-
-	parent, e = childContext.Value(subtotalAPIContextKey{}).(SubtotalAPI).
-		GetByName(parentName)
+	childContext, e = postASubtotal(parentContext, name, parentName)
 	if e != nil {
 		return
 	}
 
-	subtotal = NewSubtotalWithParent(name, parent)
+	return
+}
+
+func thereShouldBeASubtotalWithParent(
+	parentContext context.Context, name string, parentName string,
+) (
+	childContext context.Context, e error,
+) {
+	childContext, e = thereShouldBeASubtotal(parentContext, name, parentName)
+	if e != nil {
+		return
+	}
+
+	return
+}
+
+func postASubtotal(
+	parentContext context.Context, name string, parentName string,
+) (
+	childContext context.Context, e error,
+) {
+	var (
+		parent   Subtotal
+		subtotal Subtotal = NewSubtotalWithNoParent(name)
+	)
+
+	childContext = parentContext
+
+	if parentName != nullParentName {
+		parent, e = childContext.Value(subtotalAPIContextKey{}).(SubtotalAPI).
+			GetByName(parentName)
+		if e != nil {
+			return
+		}
+
+		subtotal = NewSubtotalWithParent(name, parent)
+	}
 
 	e = childContext.Value(subtotalAPIContextKey{}).(SubtotalAPI).Post(subtotal)
 	if e != nil {
@@ -156,7 +158,7 @@ func postASubtotalWithParent(
 	return
 }
 
-func thereShouldBeASubtotalWithParent(
+func thereShouldBeASubtotal(
 	parentContext context.Context, name string, parentName string,
 ) (
 	childContext context.Context, e error,
@@ -181,12 +183,23 @@ func thereShouldBeASubtotalWithParent(
 		return
 	}
 
-	e = testutils.Verify(assert.Equal,
-		parentName,
-		subtotal.Parent().Name(),
-	)
-	if e != nil {
-		return
+	if parentName == nullParentName {
+		e = testutils.Verify(assert.Equal,
+			nil,
+			subtotal.Parent(),
+		)
+		if e != nil {
+			return
+		}
+
+	} else {
+		e = testutils.Verify(assert.Equal,
+			parentName,
+			subtotal.Parent().Name(),
+		)
+		if e != nil {
+			return
+		}
 	}
 
 	return
@@ -194,4 +207,8 @@ func thereShouldBeASubtotalWithParent(
 
 type (
 	subtotalAPIContextKey struct{}
+)
+
+const (
+	nullParentName = ""
 )
