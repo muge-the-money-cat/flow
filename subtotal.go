@@ -1,95 +1,31 @@
 package main
 
 import (
-	"fmt"
+	"net/http"
+
+	"github.com/gin-gonic/gin"
+
+	"github.com/muge-the-money-cat/flow/testutils"
 )
 
-type Subtotal interface {
-	Name() string
-	Parent() Subtotal
+type subtotalHTTPAPIServer struct {
+	engine *gin.Engine
 }
 
-type subtotal struct {
-	name   string
-	parent Subtotal
-}
-
-func NewSubtotalWithNoParent(name string) (s *subtotal) {
-	s = &subtotal{
-		name: name,
+func NewSubtotalHTTPAPIServer() (s *subtotalHTTPAPIServer) {
+	s = &subtotalHTTPAPIServer{
+		engine: gin.Default(),
 	}
+
+	s.engine.GET("/up/", s.up)
+
+	go s.engine.Run(testutils.TestServerAddress)
 
 	return
 }
 
-func NewSubtotalWithParent(name string, parent Subtotal) (s *subtotal) {
-	s = &subtotal{
-		name:   name,
-		parent: parent,
-	}
-
-	return
-}
-
-func (s *subtotal) Name() string {
-	return s.name
-}
-
-func (s *subtotal) Parent() Subtotal {
-	return s.parent
-}
-
-type SubtotalAPI interface {
-	Post(Subtotal) error
-	GetByName(string) (Subtotal, error)
-}
-
-type inMemorySubtotalAPI struct {
-	store map[string]Subtotal
-}
-
-func NewInMemorySubtotalAPI() (a *inMemorySubtotalAPI) {
-	a = &inMemorySubtotalAPI{
-		store: make(map[string]Subtotal),
-	}
-
-	return
-}
-
-func (a *inMemorySubtotalAPI) Post(s Subtotal) (e error) {
-	var (
-		exists bool
-	)
-
-	_, exists = a.store[s.Name()]
-	if exists {
-		e = fmt.Errorf(`Could not POST: Subtotal with name "%s" already exists`,
-			s.Name(),
-		)
-
-		return
-	}
-
-	a.store[s.Name()] = s
-
-	return
-}
-
-func (a *inMemorySubtotalAPI) GetByName(name string) (s Subtotal, e error) {
-	var (
-		exists bool
-	)
-
-	_, exists = a.store[name]
-	if !exists {
-		e = fmt.Errorf(`Could not GET by name: Subtotal "%s" does not exist`,
-			name,
-		)
-
-		return
-	}
-
-	s = a.store[name]
+func (s *subtotalHTTPAPIServer) up(c *gin.Context) {
+	c.JSON(http.StatusOK, nil)
 
 	return
 }

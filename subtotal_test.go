@@ -2,9 +2,12 @@ package main
 
 import (
 	"context"
+	"fmt"
+	"net/http"
 	"testing"
 
 	"github.com/cucumber/godog"
+	"github.com/go-resty/resty/v2"
 	"github.com/stretchr/testify/assert"
 
 	"github.com/muge-the-money-cat/flow/testutils"
@@ -18,6 +21,8 @@ func TestSubtotal(t *testing.T) {
 		}
 	)
 
+	NewSubtotalHTTPAPIServer()
+
 	if testSuite.Run() != 0 {
 		t.Fatal()
 	}
@@ -26,189 +31,96 @@ func TestSubtotal(t *testing.T) {
 }
 
 func initialiseSubtotalScenarios(ctx *godog.ScenarioContext) {
-	ctx.Step(`^there is a Subtotal API$`,
-		thereIsASubtotalAPI,
+	ctx.Step(`^a Subtotal HTTP API server is up$`,
+		subtotalHTTPAPIServerIsUp,
 	)
-	ctx.Step(`^we POST a Subtotal with name "(.+)" and no parent$`,
-		postASubtotalWithNoParent,
+	ctx.Step(`^we GET a Subtotal by name "(.+)"$`,
+		getSubtotalByName,
 	)
-	ctx.Step(`^there should be a Subtotal with name "(.+)" and no parent$`,
-		thereShouldBeASubtotalWithNoParent,
-	)
-	ctx.Step(`^there is a Subtotal with name "(.+)"$`,
-		thereIsASubtotal,
-	)
-	ctx.Step(`^we POST a Subtotal with name "(.+)" and parent "(.+)"$`,
-		postASubtotalWithParent,
-	)
-	ctx.Step(`^there should be a Subtotal with name "(.+)" and parent "(.+)"$`,
-		thereShouldBeASubtotalWithParent,
+	ctx.Step(`^we should see HTTP response status (\d{3})$`,
+		shouldSeeHTTPResponseStatus,
 	)
 
 	return
 }
 
-func thereIsASubtotalAPI(parentContext context.Context) (
+func subtotalHTTPAPIServerIsUp(parentContext context.Context) (
 	childContext context.Context, e error,
 ) {
+	const (
+		urlFormat = "http://%s/up/"
+	)
+
 	var (
-		api SubtotalAPI = NewInMemorySubtotalAPI()
-	)
+		url string = fmt.Sprintf(urlFormat, testutils.TestServerAddress)
 
-	childContext = context.WithValue(parentContext,
-		subtotalAPIContextKey{},
-		api,
-	)
-
-	return
-}
-
-func postASubtotalWithNoParent(parentContext context.Context, name string,
-) (
-	childContext context.Context, e error,
-) {
-	childContext, e = postASubtotal(parentContext, name, nullParentName)
-	if e != nil {
-		return
-	}
-
-	return
-}
-
-func thereShouldBeASubtotalWithNoParent(
-	parentContext context.Context, name string,
-) (
-	childContext context.Context, e error,
-) {
-	childContext, e = thereShouldBeASubtotal(parentContext,
-		name,
-		nullParentName,
-	)
-	if e != nil {
-		return
-	}
-
-	return
-}
-
-func thereIsASubtotal(parentContext context.Context, name string) (
-	childContext context.Context, e error,
-) {
-	childContext, e = postASubtotalWithNoParent(parentContext, name)
-	if e != nil {
-		return
-	}
-
-	return
-}
-
-func postASubtotalWithParent(
-	parentContext context.Context, name string, parentName string,
-) (
-	childContext context.Context, e error,
-) {
-	childContext, e = postASubtotal(parentContext, name, parentName)
-	if e != nil {
-		return
-	}
-
-	return
-}
-
-func thereShouldBeASubtotalWithParent(
-	parentContext context.Context, name string, parentName string,
-) (
-	childContext context.Context, e error,
-) {
-	childContext, e = thereShouldBeASubtotal(parentContext, name, parentName)
-	if e != nil {
-		return
-	}
-
-	return
-}
-
-func postASubtotal(
-	parentContext context.Context, name string, parentName string,
-) (
-	childContext context.Context, e error,
-) {
-	var (
-		parent   Subtotal
-		subtotal Subtotal = NewSubtotalWithNoParent(name)
+		response *resty.Response
 	)
 
 	childContext = parentContext
 
-	if parentName != nullParentName {
-		parent, e = childContext.Value(subtotalAPIContextKey{}).(SubtotalAPI).
-			GetByName(parentName)
-		if e != nil {
-			return
-		}
-
-		subtotal = NewSubtotalWithParent(name, parent)
-	}
-
-	e = childContext.Value(subtotalAPIContextKey{}).(SubtotalAPI).Post(subtotal)
-	if e != nil {
-		return
-	}
-
-	return
-}
-
-func thereShouldBeASubtotal(
-	parentContext context.Context, name string, parentName string,
-) (
-	childContext context.Context, e error,
-) {
-	var (
-		subtotal Subtotal
-	)
-
-	childContext = parentContext
-
-	subtotal, e = childContext.Value(subtotalAPIContextKey{}).(SubtotalAPI).
-		GetByName(name)
+	response, e = testutils.RESTClient.R().Get(url)
 	if e != nil {
 		return
 	}
 
 	e = testutils.Verify(assert.Equal,
-		name,
-		subtotal.Name(),
+		http.StatusOK,
+		response.StatusCode(),
 	)
 	if e != nil {
 		return
 	}
 
-	if parentName == nullParentName {
-		e = testutils.Verify(assert.Equal,
-			nil,
-			subtotal.Parent(),
-		)
-		if e != nil {
-			return
-		}
+	return
+}
 
-	} else {
-		e = testutils.Verify(assert.Equal,
-			parentName,
-			subtotal.Parent().Name(),
-		)
-		if e != nil {
-			return
-		}
+func getSubtotalByName(parentContext context.Context, name string) (
+	childContext context.Context, e error,
+) {
+	const (
+		urlFormat = "http://%s/subtotal/?name=%s"
+	)
+
+	var (
+		url string = fmt.Sprintf(urlFormat, testutils.TestServerAddress, name)
+
+		response *resty.Response
+	)
+
+	childContext = parentContext
+
+	response, e = testutils.RESTClient.R().Get(url)
+	if e != nil {
+		return
+	}
+
+	childContext = context.WithValue(parentContext,
+		subtotalHTTPResponseContextKey{},
+		response,
+	)
+
+	return
+}
+
+func shouldSeeHTTPResponseStatus(parentContext context.Context, status int) (
+	childContext context.Context, e error,
+) {
+	childContext = parentContext
+
+	e = testutils.Verify(assert.Equal,
+		http.StatusNotFound,
+		parentContext.Value(subtotalHTTPResponseContextKey{}).(*resty.Response).
+			StatusCode(),
+	)
+	if e != nil {
+		return
 	}
 
 	return
 }
 
 type (
-	subtotalAPIContextKey struct{}
-)
-
-const (
-	nullParentName = ""
+	subtotalHTTPAPIContextKey      struct{}
+	subtotalHTTPResponseContextKey struct{}
 )
