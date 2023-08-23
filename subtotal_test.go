@@ -109,7 +109,7 @@ func shouldSeeHTTPResponseStatus(parentContext context.Context, status int) (
 	childContext = parentContext
 
 	e = testutils.Verify(assert.Equal,
-		http.StatusNotFound,
+		status,
 		parentContext.Value(subtotalHTTPResponseContextKey{}).(*resty.Response).
 			StatusCode(),
 	)
