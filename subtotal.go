@@ -1,14 +1,12 @@
 package main
 
 import (
-	"context"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 
 	"github.com/muge-the-money-cat/flow/ent"
 	"github.com/muge-the-money-cat/flow/ent/subtotal"
-	"github.com/muge-the-money-cat/flow/testutils"
 )
 
 type Subtotal struct {
@@ -16,46 +14,7 @@ type Subtotal struct {
 	ParentID int    `json:"parentID"`
 }
 
-type subtotalHTTPAPIServer struct {
-	entClient *ent.Client
-	ginEngine *gin.Engine
-}
-
-func NewSubtotalHTTPAPIServer(entDriverName, entSourceName string) (
-	a *subtotalHTTPAPIServer, e error,
-) {
-	a = &subtotalHTTPAPIServer{
-		ginEngine: gin.Default(),
-	}
-
-	a.entClient, e = ent.Open(entDriverName, entSourceName)
-	if e != nil {
-		return
-	}
-
-	e = a.entClient.Schema.Create(
-		context.Background(),
-	)
-	if e != nil {
-		return
-	}
-
-	a.ginEngine.GET("/up/", a.up)
-	a.ginEngine.POST("/subtotal/", a.post)
-	a.ginEngine.GET("/subtotal/", a.get)
-
-	go a.ginEngine.Run(testutils.TestServerAddress)
-
-	return
-}
-
-func (a *subtotalHTTPAPIServer) up(c *gin.Context) {
-	c.Status(http.StatusOK)
-
-	return
-}
-
-func (a *subtotalHTTPAPIServer) post(c *gin.Context) {
+func (a *flowHTTPAPIV1Server) postSubtotal(c *gin.Context) {
 	var (
 		e error
 		s Subtotal
@@ -86,7 +45,7 @@ func (a *subtotalHTTPAPIServer) post(c *gin.Context) {
 	return
 }
 
-func (a *subtotalHTTPAPIServer) get(c *gin.Context) {
+func (a *flowHTTPAPIV1Server) getSubtotal(c *gin.Context) {
 	var (
 		e error
 		q *ent.Subtotal

@@ -24,7 +24,7 @@ func TestSubtotal(t *testing.T) {
 		e error
 	)
 
-	_, e = NewSubtotalHTTPAPIServer(
+	_, e = NewFlowHTTPAPIV1Server(
 		testutils.EntDriverName,
 		testutils.EntSourceName,
 	)
@@ -40,8 +40,8 @@ func TestSubtotal(t *testing.T) {
 }
 
 func initialiseSubtotalScenarios(ctx *godog.ScenarioContext) {
-	ctx.Step(`^a Subtotal HTTP API server is up$`,
-		subtotalHTTPAPIServerIsUp,
+	ctx.Step(`^a Flow HTTP API v1 server is up$`,
+		flowHTTPAPIV1ServerIsUp,
 	)
 	ctx.Step(`^we GET a Subtotal by name "(.+)"$`,
 		getSubtotalByName,
@@ -59,11 +59,11 @@ func initialiseSubtotalScenarios(ctx *godog.ScenarioContext) {
 	return
 }
 
-func subtotalHTTPAPIServerIsUp(parentContext context.Context) (
+func flowHTTPAPIV1ServerIsUp(parentContext context.Context) (
 	childContext context.Context, e error,
 ) {
 	const (
-		urlFormat = "http://%s/up/"
+		urlFormat = "http://%s/v1/up/"
 	)
 
 	var (
@@ -94,7 +94,7 @@ func getSubtotalByName(parentContext context.Context, name string) (
 	childContext context.Context, e error,
 ) {
 	const (
-		urlFormat = "http://%s/subtotal/"
+		urlFormat = "http://%s/v1/subtotal/"
 	)
 
 	var (
@@ -162,7 +162,7 @@ func postSubtotalWithNoParent(parentContext context.Context, name string) (
 	childContext context.Context, e error,
 ) {
 	const (
-		urlFormat = "http://%s/subtotal/"
+		urlFormat = "http://%s/v1/subtotal/"
 	)
 
 	var (
