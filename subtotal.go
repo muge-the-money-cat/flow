@@ -35,7 +35,15 @@ func (a *flowHTTPAPIV1Server) postSubtotal(c *gin.Context) {
 		c.Request.Context(),
 	)
 	if e != nil {
-		c.Status(http.StatusInternalServerError)
+		if ent.IsConstraintError(e) {
+			c.Status(http.StatusConflict)
+
+			return
+		}
+
+		c.String(http.StatusInternalServerError,
+			e.Error(), // XXX: remove before flight
+		)
 
 		return
 	}

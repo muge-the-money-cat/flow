@@ -15,3 +15,9 @@ Feature: Subtotal
     And we GET a Subtotal by name "Profit & Loss"
     Then we should see HTTP response status 200
     And we should see a Subtotal with name "Profit & Loss" and no parent
+
+  Scenario: POST Subtotal and then POST another Subtotal with same name
+    Given a Flow HTTP API v1 server is up
+    When we POST a Subtotal with name "Liabilities" and no parent
+    And we POST a Subtotal with name "Liabilities" and no parent
+    Then we should see HTTP response status 409
