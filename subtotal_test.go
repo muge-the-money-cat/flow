@@ -63,7 +63,7 @@ func flowHTTPAPIV1ServerIsUp(parentContext context.Context) (
 	childContext context.Context, e error,
 ) {
 	const (
-		urlFormat = "http://%s/v1/up/"
+		urlFormat = "http://%s/v1/up"
 	)
 
 	var (
@@ -93,13 +93,7 @@ func flowHTTPAPIV1ServerIsUp(parentContext context.Context) (
 func getSubtotalByName(parentContext context.Context, name string) (
 	childContext context.Context, e error,
 ) {
-	const (
-		urlFormat = "http://%s/v1/subtotal/"
-	)
-
 	var (
-		url string = fmt.Sprintf(urlFormat, testutils.TestServerAddress)
-
 		response *resty.Response
 	)
 
@@ -107,7 +101,7 @@ func getSubtotalByName(parentContext context.Context, name string) (
 
 	response, e = testutils.RESTClient.R().
 		SetQueryParam("Name", name).
-		Get(url)
+		Get(subtotalURL)
 	if e != nil {
 		return
 	}
@@ -129,8 +123,9 @@ func shouldSeeHTTPResponseStatus(parentContext context.Context, expected int) (
 
 	childContext = parentContext
 
-	actual = parentContext.
-		Value(subtotalHTTPResponseContextKey{}).(*resty.Response).
+	actual = parentContext.Value(
+		subtotalHTTPResponseContextKey{},
+	).(*resty.Response).
 		StatusCode()
 
 	switch actual {
@@ -139,8 +134,9 @@ func shouldSeeHTTPResponseStatus(parentContext context.Context, expected int) (
 
 	case http.StatusInternalServerError:
 		e = fmt.Errorf(
-			parentContext.
-				Value(subtotalHTTPResponseContextKey{}).(*resty.Response).
+			parentContext.Value(
+				subtotalHTTPResponseContextKey{},
+			).(*resty.Response).
 				String(),
 		)
 
@@ -161,13 +157,8 @@ func shouldSeeHTTPResponseStatus(parentContext context.Context, expected int) (
 func postSubtotalWithNoParent(parentContext context.Context, name string) (
 	childContext context.Context, e error,
 ) {
-	const (
-		urlFormat = "http://%s/v1/subtotal/"
-	)
-
 	var (
-		subtotal        = Subtotal{Name: name}
-		url      string = fmt.Sprintf(urlFormat, testutils.TestServerAddress)
+		subtotal = Subtotal{Name: name}
 
 		response *resty.Response
 	)
@@ -177,7 +168,7 @@ func postSubtotalWithNoParent(parentContext context.Context, name string) (
 	response, e = testutils.RESTClient.R().
 		SetBody(subtotal).
 		SetResult(&subtotal).
-		Post(url)
+		Post(subtotalURL)
 	if e != nil {
 		return
 	}
@@ -198,14 +189,24 @@ func postSubtotalWithNoParent(parentContext context.Context, name string) (
 func shouldSeeSubtotalWithNoParent(parentContext context.Context, name string) (
 	childContext context.Context, e error,
 ) {
-	childContext = parentContext
-
-	e = testutils.Verify(assert.Equal,
-		Subtotal{
+	var (
+		expected = Subtotal{
 			Name:     name,
 			ParentID: 0,
-		},
-		parentContext.Value(subtotalHTTPResponseParsedContextKey{}).(Subtotal),
+		}
+
+		actual Subtotal
+	)
+
+	childContext = parentContext
+
+	actual = parentContext.Value(
+		subtotalHTTPResponseParsedContextKey{},
+	).(Subtotal)
+
+	e = testutils.Verify(assert.Equal,
+		expected,
+		actual,
 	)
 	if e != nil {
 		return
@@ -218,4 +219,14 @@ type (
 	subtotalHTTPAPIContextKey            struct{}
 	subtotalHTTPResponseContextKey       struct{}
 	subtotalHTTPResponseParsedContextKey struct{}
+)
+
+const (
+	subtotalURLFormat = "http://%s/v1/subtotal"
+)
+
+var (
+	subtotalURL string = fmt.Sprintf(subtotalURLFormat,
+		testutils.TestServerAddress,
+	)
 )

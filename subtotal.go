@@ -10,8 +10,8 @@ import (
 )
 
 type Subtotal struct {
-	Name     string `json:"name"`
-	ParentID int    `json:"parentID"`
+	Name     string
+	ParentID int
 }
 
 func (a *flowHTTPAPIV1Server) postSubtotal(c *gin.Context) {
