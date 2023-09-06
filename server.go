@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"net"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -22,10 +23,16 @@ type flowHTTPAPIV1Server struct {
 func NewFlowHTTPAPIV1Server(entDriverName, entSourceName string) (
 	a *flowHTTPAPIV1Server, e error,
 ) {
+	const (
+		network = "tcp"
+	)
+
 	var (
 		subtotal *gin.RouterGroup
 		up       *gin.RouterGroup
 		v1       *gin.RouterGroup
+
+		listener net.Listener
 	)
 
 	a = &flowHTTPAPIV1Server{
@@ -55,13 +62,41 @@ func NewFlowHTTPAPIV1Server(entDriverName, entSourceName string) (
 	subtotal.POST(root, a.postSubtotal)
 	subtotal.GET(root, a.getSubtotal)
 
-	go a.ginEngine.Run(testutils.TestServerAddress)
+	listener, e = net.Listen(network, testutils.TestServerAddress)
+	if e != nil {
+		return
+	}
+
+	go a.ginEngine.RunListener(listener)
 
 	return
 }
 
-func (a *flowHTTPAPIV1Server) up(c *gin.Context) {
+func (*flowHTTPAPIV1Server) up(c *gin.Context) {
 	c.Status(http.StatusOK)
+
+	return
+}
+
+func (*flowHTTPAPIV1Server) handleError(c *gin.Context, e error) {
+	switch {
+	case ent.IsNotFound(e):
+		c.Status(http.StatusNotFound)
+
+		return
+
+	case ent.IsConstraintError(e):
+		c.Status(http.StatusConflict)
+
+		return
+
+	default:
+		c.String(http.StatusInternalServerError,
+			e.Error(), // XXX: remove before flight
+		)
+
+		return
+	}
 
 	return
 }
