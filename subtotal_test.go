@@ -150,14 +150,12 @@ func shouldSeeSubtotalWithNoParent(parentContext context.Context, name string) (
 			ParentID: 0,
 		}
 
-		actual Subtotal
+		actual Subtotal = parentContext.Value(
+			subtotalHTTPResponseParsedContextKey{},
+		).(Subtotal)
 	)
 
 	childContext = parentContext
-
-	actual = parentContext.Value(
-		subtotalHTTPResponseParsedContextKey{},
-	).(Subtotal)
 
 	e = testutils.Verify(assert.Equal,
 		expected,

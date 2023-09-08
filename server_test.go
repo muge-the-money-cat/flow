@@ -16,15 +16,13 @@ func shouldSeeHTTPResponseStatus(parentContext context.Context, expected int) (
 	childContext context.Context, e error,
 ) {
 	var (
-		actual int
+		actual int = parentContext.Value(
+			subtotalHTTPResponseContextKey{},
+		).(*resty.Response).
+			StatusCode()
 	)
 
 	childContext = parentContext
-
-	actual = parentContext.Value(
-		subtotalHTTPResponseContextKey{},
-	).(*resty.Response).
-		StatusCode()
 
 	switch actual {
 	case http.StatusBadRequest:
