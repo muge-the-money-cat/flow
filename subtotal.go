@@ -14,6 +14,25 @@ type Subtotal struct {
 	ParentID int
 }
 
+func withSubtotalEndpoint() (option flowHTTPAPIV1ServerOption) {
+	const (
+		subpath = "subtotal"
+	)
+
+	option = func(a *flowHTTPAPIV1Server) {
+		var (
+			routerGroup *gin.RouterGroup = a.baseRouterGroup.Group(subpath)
+		)
+
+		routerGroup.POST(root, a.postSubtotal)
+		routerGroup.GET(root, a.getSubtotal)
+
+		return
+	}
+
+	return
+}
+
 func (a *flowHTTPAPIV1Server) postSubtotal(c *gin.Context) {
 	var (
 		e error

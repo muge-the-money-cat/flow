@@ -16,23 +16,24 @@ const (
 )
 
 type flowHTTPAPIV1Server struct {
-	entClient *ent.Client
-	ginEngine *gin.Engine
+	entClient       *ent.Client
+	ginEngine       *gin.Engine
+	baseRouterGroup *gin.RouterGroup
 }
 
-func NewFlowHTTPAPIV1Server(entDriverName, entSourceName string) (
+func NewFlowHTTPAPIV1Server(entDriverName, entSourceName string,
+	options ...flowHTTPAPIV1ServerOption,
+) (
 	a *flowHTTPAPIV1Server, e error,
 ) {
 	const (
-		network = "tcp"
+		basePath = "v1"
+		network  = "tcp"
 	)
 
 	var (
-		subtotal *gin.RouterGroup
-		up       *gin.RouterGroup
-		v1       *gin.RouterGroup
-
 		listener net.Listener
+		option   flowHTTPAPIV1ServerOption
 	)
 
 	a = &flowHTTPAPIV1Server{
@@ -51,16 +52,11 @@ func NewFlowHTTPAPIV1Server(entDriverName, entSourceName string) (
 		return
 	}
 
-	v1 = a.ginEngine.Group("/v1")
+	a.baseRouterGroup = a.ginEngine.Group(basePath)
 
-	up = v1.Group("/up")
-
-	up.GET(root, a.up)
-
-	subtotal = v1.Group("/subtotal")
-
-	subtotal.POST(root, a.postSubtotal)
-	subtotal.GET(root, a.getSubtotal)
+	for _, option = range options {
+		option(a)
+	}
 
 	listener, e = net.Listen(network, testutils.TestServerAddress)
 	if e != nil {
@@ -90,6 +86,26 @@ func (*flowHTTPAPIV1Server) handleError(c *gin.Context, e error) {
 		c.String(http.StatusInternalServerError,
 			e.Error(), // XXX: remove before flight
 		)
+	}
+
+	return
+}
+
+type flowHTTPAPIV1ServerOption func(*flowHTTPAPIV1Server)
+
+func withUpEndpoint() (option flowHTTPAPIV1ServerOption) {
+	const (
+		subpath = "up"
+	)
+
+	option = func(a *flowHTTPAPIV1Server) {
+		var (
+			routerGroup *gin.RouterGroup = a.baseRouterGroup.Group(subpath)
+		)
+
+		routerGroup.GET(root, a.up)
+
+		return
 	}
 
 	return

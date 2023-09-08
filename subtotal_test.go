@@ -26,6 +26,8 @@ func TestSubtotal(t *testing.T) {
 	_, e = NewFlowHTTPAPIV1Server(
 		testutils.EntDriverName,
 		testutils.EntSourceName,
+		withUpEndpoint(),
+		withSubtotalEndpoint(),
 	)
 	if e != nil {
 		t.Fatal(e)
