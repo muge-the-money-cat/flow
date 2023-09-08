@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"net/http"
 	"testing"
 
@@ -12,6 +11,12 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	"github.com/muge-the-money-cat/flow/testutils"
+)
+
+var (
+	subtotalURL string = baseURL.
+		JoinPath(subtotalSubpath).
+		String()
 )
 
 func TestSubtotal(t *testing.T) {
@@ -172,14 +177,4 @@ type (
 	subtotalHTTPAPIContextKey            struct{}
 	subtotalHTTPResponseContextKey       struct{}
 	subtotalHTTPResponseParsedContextKey struct{}
-)
-
-const (
-	subtotalURLFormat = "http://%s/v1/subtotal"
-)
-
-var (
-	subtotalURL string = fmt.Sprintf(subtotalURLFormat,
-		testutils.TestServerAddress,
-	)
 )

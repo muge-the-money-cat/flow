@@ -4,12 +4,21 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"net/url"
 
 	"github.com/go-resty/resty/v2"
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/stretchr/testify/assert"
 
 	"github.com/muge-the-money-cat/flow/testutils"
+)
+
+var (
+	baseURL = &url.URL{
+		Scheme: "http",
+		Host:   testutils.TestServerAddress,
+		Path:   basePath,
+	}
 )
 
 func shouldSeeHTTPResponseStatus(parentContext context.Context, expected int) (
