@@ -83,19 +83,13 @@ func (*flowHTTPAPIV1Server) handleError(c *gin.Context, e error) {
 	case ent.IsNotFound(e):
 		c.Status(http.StatusNotFound)
 
-		return
-
 	case ent.IsConstraintError(e):
 		c.Status(http.StatusConflict)
-
-		return
 
 	default:
 		c.String(http.StatusInternalServerError,
 			e.Error(), // XXX: remove before flight
 		)
-
-		return
 	}
 
 	return
