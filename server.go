@@ -68,12 +68,6 @@ func NewFlowHTTPAPIV1Server(entDriverName, entSourceName string,
 	return
 }
 
-func (*flowHTTPAPIV1Server) up(c *gin.Context) {
-	c.Status(http.StatusOK)
-
-	return
-}
-
 func (*flowHTTPAPIV1Server) handleError(c *gin.Context, e error) {
 	switch {
 	case ent.IsNotFound(e):
@@ -92,21 +86,3 @@ func (*flowHTTPAPIV1Server) handleError(c *gin.Context, e error) {
 }
 
 type flowHTTPAPIV1ServerOption func(*flowHTTPAPIV1Server)
-
-func withUpEndpoint() (option flowHTTPAPIV1ServerOption) {
-	const (
-		subpath = "up"
-	)
-
-	option = func(a *flowHTTPAPIV1Server) {
-		var (
-			routerGroup *gin.RouterGroup = a.baseRouterGroup.Group(subpath)
-		)
-
-		routerGroup.GET(root, a.up)
-
-		return
-	}
-
-	return
-}

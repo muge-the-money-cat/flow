@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"net/http"
 	"testing"
 
 	"github.com/cucumber/godog"
@@ -26,7 +27,6 @@ func TestSubtotal(t *testing.T) {
 	_, e = NewFlowHTTPAPIV1Server(
 		testutils.EntDriverName,
 		testutils.EntSourceName,
-		withUpEndpoint(),
 		withSubtotalEndpoint(),
 	)
 	if e != nil {
@@ -41,8 +41,8 @@ func TestSubtotal(t *testing.T) {
 }
 
 func initialiseSubtotalScenarios(ctx *godog.ScenarioContext) {
-	ctx.Step(`^a Flow HTTP API v1 server is up$`,
-		flowHTTPAPIV1ServerIsUp,
+	ctx.Step(`^a Subtotal endpoint is available$`,
+		subtotalEndpointIsAvailable,
 	)
 	ctx.Step(`^we GET a Subtotal by name "(.+)"$`,
 		getSubtotalByName,
@@ -56,6 +56,31 @@ func initialiseSubtotalScenarios(ctx *godog.ScenarioContext) {
 	ctx.Step(`^we should see a Subtotal with name "(.+)" and no parent$`,
 		shouldSeeSubtotalWithNoParent,
 	)
+
+	return
+}
+
+func subtotalEndpointIsAvailable(parentContext context.Context) (
+	childContext context.Context, e error,
+) {
+	var (
+		response *resty.Response
+	)
+
+	childContext = parentContext
+
+	response, e = testutils.RESTClient.R().Options(subtotalURL)
+	if e != nil {
+		return
+	}
+
+	e = testutils.Verify(assert.Equal,
+		http.StatusNoContent,
+		response.StatusCode(),
+	)
+	if e != nil {
+		return
+	}
 
 	return
 }

@@ -9,26 +9,35 @@ import (
 	"github.com/muge-the-money-cat/flow/ent/subtotal"
 )
 
+const (
+	subtotalSubpath = "subtotal"
+)
+
 type Subtotal struct {
 	Name     string
 	ParentID int
 }
 
 func withSubtotalEndpoint() (option flowHTTPAPIV1ServerOption) {
-	const (
-		subpath = "subtotal"
-	)
-
 	option = func(a *flowHTTPAPIV1Server) {
 		var (
-			routerGroup *gin.RouterGroup = a.baseRouterGroup.Group(subpath)
+			routerGroup *gin.RouterGroup = a.baseRouterGroup.Group(
+				subtotalSubpath,
+			)
 		)
 
+		routerGroup.OPTIONS(root, a.subtotalOptions)
 		routerGroup.POST(root, a.postSubtotal)
 		routerGroup.GET(root, a.getSubtotal)
 
 		return
 	}
+
+	return
+}
+
+func (a *flowHTTPAPIV1Server) subtotalOptions(c *gin.Context) {
+	c.Status(http.StatusNoContent) // FIXME
 
 	return
 }
