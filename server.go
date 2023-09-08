@@ -26,20 +26,30 @@ func NewFlowHTTPAPIV1Server(entDriverName, entSourceName string,
 ) (
 	a *flowHTTPAPIV1Server, e error,
 ) {
-	const (
-		basePath = "v1"
-		network  = "tcp"
-	)
+	a = new(flowHTTPAPIV1Server)
 
-	var (
-		listener net.Listener
-		option   flowHTTPAPIV1ServerOption
-	)
-
-	a = &flowHTTPAPIV1Server{
-		ginEngine: gin.Default(),
+	e = a.initialiseEntClient(entDriverName, entSourceName)
+	if e != nil {
+		return
 	}
 
+	a.initialiseGinEngine()
+
+	a.applyOptions(options)
+
+	e = a.listenAndServe()
+	if e != nil {
+		return
+	}
+
+	return
+}
+
+func (a *flowHTTPAPIV1Server) initialiseEntClient(
+	entDriverName, entSourceName string,
+) (
+	e error,
+) {
 	a.entClient, e = ent.Open(entDriverName, entSourceName)
 	if e != nil {
 		return
@@ -52,11 +62,43 @@ func NewFlowHTTPAPIV1Server(entDriverName, entSourceName string,
 		return
 	}
 
+	return
+}
+
+func (a *flowHTTPAPIV1Server) initialiseGinEngine() {
+	const (
+		basePath = "v1"
+	)
+
+	a.ginEngine = gin.Default()
+
 	a.baseRouterGroup = a.ginEngine.Group(basePath)
+
+	return
+}
+
+func (a *flowHTTPAPIV1Server) applyOptions(
+	options []flowHTTPAPIV1ServerOption,
+) {
+	var (
+		option flowHTTPAPIV1ServerOption
+	)
 
 	for _, option = range options {
 		option(a)
 	}
+
+	return
+}
+
+func (a *flowHTTPAPIV1Server) listenAndServe() (e error) {
+	const (
+		network = "tcp"
+	)
+
+	var (
+		listener net.Listener
+	)
 
 	listener, e = net.Listen(network, testutils.TestServerAddress)
 	if e != nil {
