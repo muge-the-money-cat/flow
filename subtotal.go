@@ -10,12 +10,13 @@ import (
 )
 
 const (
+	nilParentName   = ""
 	subtotalSubpath = "subtotal"
 )
 
 type Subtotal struct {
-	Name     string
-	ParentID int
+	Name       string
+	ParentName string
 }
 
 func withSubtotalEndpoint() (option flowHTTPAPIV1ServerOption) {
@@ -45,6 +46,7 @@ func (server *flowHTTPAPIV1Server) subtotalOptions(ginContext *gin.Context) {
 func (server *flowHTTPAPIV1Server) postSubtotal(ginContext *gin.Context) {
 	var (
 		e error
+		q *ent.Subtotal
 		s Subtotal
 
 		create *ent.SubtotalCreate
@@ -55,8 +57,21 @@ func (server *flowHTTPAPIV1Server) postSubtotal(ginContext *gin.Context) {
 	create = server.entClient.Subtotal.Create().
 		SetName(s.Name)
 
-	if s.ParentID != 0 {
-		create.SetParentID(s.ParentID)
+	if s.ParentName != nilParentName {
+		q, e = server.entClient.Subtotal.Query().
+			Where(
+				subtotal.Name(s.ParentName),
+			).
+			Only(
+				ginContext.Request.Context(),
+			)
+		if e != nil {
+			server.handleError(ginContext, e)
+
+			return
+		}
+
+		create.SetParentID(q.ID)
 	}
 
 	_, e = create.Save(
@@ -101,7 +116,7 @@ func (server *flowHTTPAPIV1Server) getSubtotal(ginContext *gin.Context) {
 	}
 
 	if q.Edges.Parent != nil {
-		s.ParentID = q.Edges.Parent.ID
+		s.ParentName = q.Edges.Parent.Name
 	}
 
 	ginContext.JSON(http.StatusOK, s)

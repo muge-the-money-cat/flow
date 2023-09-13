@@ -61,6 +61,12 @@ func initialiseSubtotalScenarios(ctx *godog.ScenarioContext) {
 	ctx.Step(`^we should see a Subtotal with name "(.+)" and no parent$`,
 		shouldSeeSubtotalWithNoParent,
 	)
+	ctx.Step(`^we POST a Subtotal with name "(.+)" and parent "(.+)"$`,
+		postSubtotalWithParent,
+	)
+	ctx.Step(`^we should see a Subtotal with name "(.+)" and parent "(.+)"$`,
+		shouldSeeSubtotalWithParent,
+	)
 
 	return
 }
@@ -114,11 +120,16 @@ func getSubtotalByName(parentContext context.Context, name string) (
 	return
 }
 
-func postSubtotalWithNoParent(parentContext context.Context, name string) (
+func postSubtotalWithParent(parentContext context.Context,
+	name, parentName string,
+) (
 	childContext context.Context, e error,
 ) {
 	var (
-		subtotal = Subtotal{Name: name}
+		subtotal = Subtotal{
+			Name:       name,
+			ParentName: parentName,
+		}
 
 		response *resty.Response
 	)
@@ -146,13 +157,21 @@ func postSubtotalWithNoParent(parentContext context.Context, name string) (
 	return
 }
 
-func shouldSeeSubtotalWithNoParent(parentContext context.Context, name string) (
+func postSubtotalWithNoParent(parentContext context.Context, name string) (
+	context.Context, error,
+) {
+	return postSubtotalWithParent(parentContext, name, nilParentName)
+}
+
+func shouldSeeSubtotalWithParent(parentContext context.Context,
+	name, parentName string,
+) (
 	childContext context.Context, e error,
 ) {
 	var (
 		expected = Subtotal{
-			Name:     name,
-			ParentID: 0,
+			Name:       name,
+			ParentName: parentName,
 		}
 
 		actual Subtotal = parentContext.Value(
@@ -171,6 +190,12 @@ func shouldSeeSubtotalWithNoParent(parentContext context.Context, name string) (
 	}
 
 	return
+}
+
+func shouldSeeSubtotalWithNoParent(parentContext context.Context, name string) (
+	context.Context, error,
+) {
+	return shouldSeeSubtotalWithParent(parentContext, name, nilParentName)
 }
 
 type (
