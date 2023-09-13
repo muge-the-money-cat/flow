@@ -19,16 +19,16 @@ type Subtotal struct {
 }
 
 func withSubtotalEndpoint() (option flowHTTPAPIV1ServerOption) {
-	option = func(a *flowHTTPAPIV1Server) {
+	option = func(server *flowHTTPAPIV1Server) {
 		var (
-			routerGroup *gin.RouterGroup = a.baseRouterGroup.Group(
+			routerGroup *gin.RouterGroup = server.baseRouterGroup.Group(
 				subtotalSubpath,
 			)
 		)
 
-		routerGroup.OPTIONS(root, a.subtotalOptions)
-		routerGroup.POST(root, a.postSubtotal)
-		routerGroup.GET(root, a.getSubtotal)
+		routerGroup.OPTIONS(root, server.subtotalOptions)
+		routerGroup.POST(root, server.postSubtotal)
+		routerGroup.GET(root, server.getSubtotal)
 
 		return
 	}
@@ -36,13 +36,13 @@ func withSubtotalEndpoint() (option flowHTTPAPIV1ServerOption) {
 	return
 }
 
-func (a *flowHTTPAPIV1Server) subtotalOptions(c *gin.Context) {
-	c.Status(http.StatusNoContent) // FIXME
+func (server *flowHTTPAPIV1Server) subtotalOptions(ginContext *gin.Context) {
+	ginContext.Status(http.StatusNoContent) // FIXME
 
 	return
 }
 
-func (a *flowHTTPAPIV1Server) postSubtotal(c *gin.Context) {
+func (server *flowHTTPAPIV1Server) postSubtotal(ginContext *gin.Context) {
 	var (
 		e error
 		s Subtotal
@@ -50,9 +50,9 @@ func (a *flowHTTPAPIV1Server) postSubtotal(c *gin.Context) {
 		create *ent.SubtotalCreate
 	)
 
-	c.Bind(&s)
+	ginContext.Bind(&s)
 
-	create = a.entClient.Subtotal.Create().
+	create = server.entClient.Subtotal.Create().
 		SetName(s.Name)
 
 	if s.ParentID != 0 {
@@ -60,38 +60,38 @@ func (a *flowHTTPAPIV1Server) postSubtotal(c *gin.Context) {
 	}
 
 	_, e = create.Save(
-		c.Request.Context(),
+		ginContext.Request.Context(),
 	)
 	if e != nil {
-		a.handleError(c, e)
+		server.handleError(ginContext, e)
 
 		return
 	}
 
-	c.Status(http.StatusCreated)
+	ginContext.Status(http.StatusCreated)
 
 	return
 }
 
-func (a *flowHTTPAPIV1Server) getSubtotal(c *gin.Context) {
+func (server *flowHTTPAPIV1Server) getSubtotal(ginContext *gin.Context) {
 	var (
 		e error
 		q *ent.Subtotal
 		s Subtotal
 	)
 
-	c.Bind(&s)
+	ginContext.Bind(&s)
 
-	q, e = a.entClient.Subtotal.Query().
+	q, e = server.entClient.Subtotal.Query().
 		WithParent().
 		Where(
 			subtotal.Name(s.Name),
 		).
 		Only(
-			c.Request.Context(),
+			ginContext.Request.Context(),
 		)
 	if e != nil {
-		a.handleError(c, e)
+		server.handleError(ginContext, e)
 
 		return
 	}
@@ -104,7 +104,7 @@ func (a *flowHTTPAPIV1Server) getSubtotal(c *gin.Context) {
 		s.ParentID = q.Edges.Parent.ID
 	}
 
-	c.JSON(http.StatusOK, s)
+	ginContext.JSON(http.StatusOK, s)
 
 	return
 }

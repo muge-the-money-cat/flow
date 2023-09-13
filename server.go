@@ -25,20 +25,20 @@ type flowHTTPAPIV1Server struct {
 func NewFlowHTTPAPIV1Server(entDriverName, entSourceName string,
 	options ...flowHTTPAPIV1ServerOption,
 ) (
-	a *flowHTTPAPIV1Server, e error,
+	server *flowHTTPAPIV1Server, e error,
 ) {
-	a = new(flowHTTPAPIV1Server)
+	server = new(flowHTTPAPIV1Server)
 
-	e = a.initialiseEntClient(entDriverName, entSourceName)
+	e = server.initialiseEntClient(entDriverName, entSourceName)
 	if e != nil {
 		return
 	}
 
-	a.initialiseGinEngine()
+	server.initialiseGinEngine()
 
-	a.applyOptions(options)
+	server.applyOptions(options)
 
-	e = a.listenAndServe()
+	e = server.listenAndServe()
 	if e != nil {
 		return
 	}
@@ -46,17 +46,17 @@ func NewFlowHTTPAPIV1Server(entDriverName, entSourceName string,
 	return
 }
 
-func (a *flowHTTPAPIV1Server) initialiseEntClient(
+func (server *flowHTTPAPIV1Server) initialiseEntClient(
 	entDriverName, entSourceName string,
 ) (
 	e error,
 ) {
-	a.entClient, e = ent.Open(entDriverName, entSourceName)
+	server.entClient, e = ent.Open(entDriverName, entSourceName)
 	if e != nil {
 		return
 	}
 
-	e = a.entClient.Schema.Create(
+	e = server.entClient.Schema.Create(
 		context.Background(),
 	)
 	if e != nil {
@@ -66,15 +66,15 @@ func (a *flowHTTPAPIV1Server) initialiseEntClient(
 	return
 }
 
-func (a *flowHTTPAPIV1Server) initialiseGinEngine() {
-	a.ginEngine = gin.Default()
+func (server *flowHTTPAPIV1Server) initialiseGinEngine() {
+	server.ginEngine = gin.Default()
 
-	a.baseRouterGroup = a.ginEngine.Group(basePath)
+	server.baseRouterGroup = server.ginEngine.Group(basePath)
 
 	return
 }
 
-func (a *flowHTTPAPIV1Server) applyOptions(
+func (server *flowHTTPAPIV1Server) applyOptions(
 	options []flowHTTPAPIV1ServerOption,
 ) {
 	var (
@@ -82,13 +82,13 @@ func (a *flowHTTPAPIV1Server) applyOptions(
 	)
 
 	for _, option = range options {
-		option(a)
+		option(server)
 	}
 
 	return
 }
 
-func (a *flowHTTPAPIV1Server) listenAndServe() (e error) {
+func (server *flowHTTPAPIV1Server) listenAndServe() (e error) {
 	const (
 		network = "tcp"
 	)
@@ -102,7 +102,7 @@ func (a *flowHTTPAPIV1Server) listenAndServe() (e error) {
 		return
 	}
 
-	go a.ginEngine.RunListener(listener)
+	go server.ginEngine.RunListener(listener)
 
 	return
 }
