@@ -201,6 +201,15 @@ func shouldSeeSubtotalWithParent(parentContext context.Context,
 	return
 }
 
+func shouldSeeSubtotalWithNoParent(parentContext context.Context, name string) (
+	context.Context, error,
+) {
+	return shouldSeeSubtotalWithParent(parentContext,
+		name,
+		nilSubtotalParentName,
+	)
+}
+
 func patchSubtotalWithNewName(parentContext context.Context,
 	name, newName string,
 ) (
@@ -273,15 +282,6 @@ func patchSubtotalWithNewParent(parentContext context.Context,
 	)
 
 	return
-}
-
-func shouldSeeSubtotalWithNoParent(parentContext context.Context, name string) (
-	context.Context, error,
-) {
-	return shouldSeeSubtotalWithParent(parentContext,
-		name,
-		nilSubtotalParentName,
-	)
 }
 
 func deleteSubtotal(parentContext context.Context, name string) (
