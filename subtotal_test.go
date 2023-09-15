@@ -67,6 +67,12 @@ func initialiseSubtotalScenarios(ctx *godog.ScenarioContext) {
 	ctx.Step(`^we should see a Subtotal with name "(.+)" and parent "(.+)"$`,
 		shouldSeeSubtotalWithParent,
 	)
+	ctx.Step(`^we PATCH a Subtotal named "(.+)" with new name "(.+)"$`,
+		patchSubtotalWithNewName,
+	)
+	ctx.Step(`^we PATCH a Subtotal named "(.+)" with new parent "(.+)"$`,
+		patchSubtotalWithNewParent,
+	)
 
 	return
 }
@@ -101,13 +107,12 @@ func getSubtotalByName(parentContext context.Context, name string) (
 ) {
 	var (
 		response *resty.Response
+		subtotal Subtotal
 	)
 
 	childContext = parentContext
 
-	response, e = testutils.RESTClient.R().
-		SetQueryParam("Name", name).
-		Get(subtotalURL)
+	response, subtotal, e = _getSubtotalByName(name)
 	if e != nil {
 		return
 	}
@@ -115,6 +120,11 @@ func getSubtotalByName(parentContext context.Context, name string) (
 	childContext = context.WithValue(parentContext,
 		subtotalHTTPResponseContextKey{},
 		response,
+	)
+
+	childContext = context.WithValue(childContext,
+		subtotalHTTPResponseParsedContextKey{},
+		subtotal,
 	)
 
 	return
@@ -138,7 +148,6 @@ func postSubtotalWithParent(parentContext context.Context,
 
 	response, e = testutils.RESTClient.R().
 		SetBody(subtotal).
-		SetResult(&subtotal).
 		Post(subtotalURL)
 	if e != nil {
 		return
@@ -149,18 +158,13 @@ func postSubtotalWithParent(parentContext context.Context,
 		response,
 	)
 
-	childContext = context.WithValue(childContext,
-		subtotalHTTPResponseParsedContextKey{},
-		subtotal,
-	)
-
 	return
 }
 
 func postSubtotalWithNoParent(parentContext context.Context, name string) (
 	context.Context, error,
 ) {
-	return postSubtotalWithParent(parentContext, name, nilParentName)
+	return postSubtotalWithParent(parentContext, name, subtotalNilParentName)
 }
 
 func shouldSeeSubtotalWithParent(parentContext context.Context,
@@ -181,6 +185,8 @@ func shouldSeeSubtotalWithParent(parentContext context.Context,
 
 	childContext = parentContext
 
+	actual.ID = subtotalNilID
+
 	e = testutils.Verify(assert.Equal,
 		expected,
 		actual,
@@ -192,10 +198,101 @@ func shouldSeeSubtotalWithParent(parentContext context.Context,
 	return
 }
 
+func patchSubtotalWithNewName(parentContext context.Context,
+	name, newName string,
+) (
+	childContext context.Context, e error,
+) {
+	var (
+		response *resty.Response
+		subtotal Subtotal
+	)
+
+	childContext = parentContext
+
+	response, subtotal, e = _getSubtotalByName(name)
+	if e != nil {
+		return
+	}
+
+	subtotal = Subtotal{
+		ID:   subtotal.ID,
+		Name: newName,
+	}
+
+	response, e = testutils.RESTClient.R().
+		SetBody(subtotal).
+		Patch(subtotalURL)
+	if e != nil {
+		return
+	}
+
+	childContext = context.WithValue(parentContext,
+		subtotalHTTPResponseContextKey{},
+		response,
+	)
+
+	return
+}
+
+func patchSubtotalWithNewParent(parentContext context.Context,
+	name, newParentName string,
+) (
+	childContext context.Context, e error,
+) {
+	var (
+		response *resty.Response
+		subtotal Subtotal
+	)
+
+	childContext = parentContext
+
+	response, subtotal, e = _getSubtotalByName(name)
+	if e != nil {
+		return
+	}
+
+	subtotal = Subtotal{
+		ID:         subtotal.ID,
+		ParentName: newParentName,
+	}
+
+	response, e = testutils.RESTClient.R().
+		SetBody(subtotal).
+		Patch(subtotalURL)
+	if e != nil {
+		return
+	}
+
+	childContext = context.WithValue(parentContext,
+		subtotalHTTPResponseContextKey{},
+		response,
+	)
+
+	return
+}
+
 func shouldSeeSubtotalWithNoParent(parentContext context.Context, name string) (
 	context.Context, error,
 ) {
-	return shouldSeeSubtotalWithParent(parentContext, name, nilParentName)
+	return shouldSeeSubtotalWithParent(parentContext,
+		name,
+		subtotalNilParentName,
+	)
+}
+
+func _getSubtotalByName(name string) (
+	response *resty.Response, subtotal Subtotal, e error,
+) {
+	response, e = testutils.RESTClient.R().
+		SetQueryParam("Name", name).
+		SetResult(&subtotal).
+		Get(subtotalURL)
+	if e != nil {
+		return
+	}
+
+	return
 }
 
 type (
