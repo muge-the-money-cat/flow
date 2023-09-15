@@ -13,10 +13,12 @@ import (
 	"github.com/muge-the-money-cat/flow/testutils"
 )
 
+const (
+	subtotalTestServerAddress = "127.78.88.231:8080"
+)
+
 var (
-	subtotalURL string = baseURL.
-		JoinPath(subtotalSubpath).
-		String()
+	subtotalURL string = endpointURL(subtotalTestServerAddress, subtotalSubpath)
 )
 
 func TestSubtotal(t *testing.T) {
@@ -30,6 +32,7 @@ func TestSubtotal(t *testing.T) {
 	)
 
 	_, e = NewFlowHTTPAPIV1Server(
+		subtotalTestServerAddress,
 		testutils.EntDriverName,
 		testutils.EntSourceName,
 		withSubtotalEndpoint(),

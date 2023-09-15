@@ -13,13 +13,19 @@ import (
 	"github.com/muge-the-money-cat/flow/testutils"
 )
 
-var (
-	baseURL = &url.URL{
-		Scheme: "http",
-		Host:   testutils.TestServerAddress,
-		Path:   basePath,
-	}
-)
+func endpointURL(host, subpath string) string {
+	var (
+		base = &url.URL{
+			Scheme: "http",
+			Host:   host,
+			Path:   basePath,
+		}
+	)
+
+	base = base.JoinPath(subpath)
+
+	return base.String()
+}
 
 func shouldSeeHTTPResponseStatus(parentContext context.Context, expected int) (
 	childContext context.Context, e error,

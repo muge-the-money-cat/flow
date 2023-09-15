@@ -8,7 +8,6 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"github.com/muge-the-money-cat/flow/ent"
-	"github.com/muge-the-money-cat/flow/testutils"
 )
 
 const (
@@ -22,7 +21,7 @@ type flowHTTPAPIV1Server struct {
 	baseRouterGroup *gin.RouterGroup
 }
 
-func NewFlowHTTPAPIV1Server(entDriverName, entSourceName string,
+func NewFlowHTTPAPIV1Server(address, entDriverName, entSourceName string,
 	options ...flowHTTPAPIV1ServerOption,
 ) (
 	server *flowHTTPAPIV1Server, e error,
@@ -38,7 +37,7 @@ func NewFlowHTTPAPIV1Server(entDriverName, entSourceName string,
 
 	server.applyOptions(options)
 
-	e = server.listenAndServe()
+	e = server.listenAndServe(address)
 	if e != nil {
 		return
 	}
@@ -88,7 +87,7 @@ func (server *flowHTTPAPIV1Server) applyOptions(
 	return
 }
 
-func (server *flowHTTPAPIV1Server) listenAndServe() (e error) {
+func (server *flowHTTPAPIV1Server) listenAndServe(address string) (e error) {
 	const (
 		network = "tcp"
 	)
@@ -97,7 +96,7 @@ func (server *flowHTTPAPIV1Server) listenAndServe() (e error) {
 		listener net.Listener
 	)
 
-	listener, e = net.Listen(network, testutils.TestServerAddress)
+	listener, e = net.Listen(network, address)
 	if e != nil {
 		return
 	}
