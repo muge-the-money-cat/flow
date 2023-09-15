@@ -7,9 +7,13 @@ import (
 	"github.com/cucumber/godog/colors"
 )
 
-var (
-	GodogOptions = &godog.Options{
+func GodogOptions(featureFilePaths ...string) (options *godog.Options) {
+	options = &godog.Options{
 		Output: colors.Colored(os.Stdout),
 		Format: "pretty",
 	}
-)
+
+	options.Paths = featureFilePaths
+
+	return
+}

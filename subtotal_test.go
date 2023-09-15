@@ -14,6 +14,7 @@ import (
 )
 
 const (
+	subtotalFeatureFilePath   = "features/subtotal.feature"
 	subtotalTestServerAddress = "127.78.88.231:8080"
 )
 
@@ -25,7 +26,9 @@ func TestSubtotal(t *testing.T) {
 	var (
 		testSuite = godog.TestSuite{
 			ScenarioInitializer: initialiseSubtotalScenarios,
-			Options:             testutils.GodogOptions,
+			Options: testutils.GodogOptions(
+				subtotalFeatureFilePath,
+			),
 		}
 
 		e error
