@@ -22,9 +22,7 @@ func endpointURL(host, subpath string) string {
 		}
 	)
 
-	base = base.JoinPath(subpath)
-
-	return base.String()
+	return base.JoinPath(subpath).String()
 }
 
 func shouldSeeHTTPResponseStatus(parentContext context.Context, expected int) (
