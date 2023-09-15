@@ -7,7 +7,7 @@ Feature: Subtotal
   Scenario: POST Subtotal with no parent
     Given a Subtotal endpoint is available
     When we POST a Subtotal with name "Balance Sheet" and no parent
-    Then we should see HTTP response status 201
+    Then we should see HTTP response status 204
 
   Scenario: POST Subtotal with no parent and then GET
     Given a Subtotal endpoint is available

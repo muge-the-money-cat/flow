@@ -81,7 +81,7 @@ func (server *flowHTTPAPIV1Server) postSubtotal(ginContext *gin.Context) {
 		return
 	}
 
-	ginContext.Status(http.StatusCreated)
+	ginContext.Status(http.StatusNoContent)
 
 	return
 }
