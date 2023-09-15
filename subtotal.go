@@ -22,6 +22,19 @@ type Subtotal struct {
 	ParentName string
 }
 
+func newSubtotalFromEntSubtotal(q *ent.Subtotal) (s Subtotal) {
+	s = Subtotal{
+		ID:   q.ID,
+		Name: q.Name,
+	}
+
+	if q.Edges.Parent != nil {
+		s.ParentName = q.Edges.Parent.Name
+	}
+
+	return
+}
+
 func withSubtotalEndpoint() (option flowHTTPAPIV1ServerOption) {
 	option = func(server *flowHTTPAPIV1Server) {
 		var (
@@ -31,9 +44,11 @@ func withSubtotalEndpoint() (option flowHTTPAPIV1ServerOption) {
 		)
 
 		routerGroup.OPTIONS(root, server.subtotalOptions)
-		routerGroup.POST(root, server.postSubtotal)
+
+		routerGroup.DELETE(root, server.deleteSubtotal)
 		routerGroup.GET(root, server.getSubtotal)
 		routerGroup.PATCH(root, server.patchSubtotal)
+		routerGroup.POST(root, server.postSubtotal)
 
 		return
 	}
@@ -102,14 +117,7 @@ func (server *flowHTTPAPIV1Server) getSubtotal(ginContext *gin.Context) {
 		return
 	}
 
-	s = Subtotal{
-		ID:   q.ID,
-		Name: q.Name,
-	}
-
-	if q.Edges.Parent != nil {
-		s.ParentName = q.Edges.Parent.Name
-	}
+	s = newSubtotalFromEntSubtotal(q)
 
 	ginContext.JSON(http.StatusOK, s)
 
@@ -158,20 +166,83 @@ func (server *flowHTTPAPIV1Server) patchSubtotal(ginContext *gin.Context) {
 	return
 }
 
-func (server *flowHTTPAPIV1Server) getSubtotalByName(ginContext *gin.Context,
-	name string,
-) (
-	q *ent.Subtotal, e error,
-) {
-	q, e = server.entClient.Subtotal.Query().
-		WithParent().
-		Where(
-			subtotal.Name(name),
-		).
-		Only(
+func (server *flowHTTPAPIV1Server) deleteSubtotal(ginContext *gin.Context) {
+	var (
+		e error
+		q *ent.Subtotal
+		s Subtotal
+	)
+
+	ginContext.Bind(&s)
+
+	q, e = server.getSubtotalByName(ginContext, s.Name,
+		loadSubtotalChildren(),
+	)
+	if e != nil {
+		server.handleError(ginContext, e)
+
+		return
+	}
+
+	if len(q.Edges.Children) > 0 {
+		ginContext.Status(http.StatusConflict)
+
+		return
+	}
+
+	e = server.entClient.Subtotal.DeleteOneID(q.ID).
+		Exec(
 			ginContext.Request.Context(),
 		)
 	if e != nil {
+		server.handleError(ginContext, e)
+
+		return
+	}
+
+	s = newSubtotalFromEntSubtotal(q)
+
+	ginContext.JSON(http.StatusOK, s)
+
+	return
+}
+
+func (server *flowHTTPAPIV1Server) getSubtotalByName(ginContext *gin.Context,
+	name string, options ...subtotalQueryOption,
+) (
+	q *ent.Subtotal, e error,
+) {
+	var (
+		option subtotalQueryOption
+		query  *ent.SubtotalQuery
+	)
+
+	query = server.entClient.Subtotal.Query().
+		WithParent().
+		Where(
+			subtotal.Name(name),
+		)
+
+	for _, option = range options {
+		option(query)
+	}
+
+	q, e = query.Only(
+		ginContext.Request.Context(),
+	)
+	if e != nil {
+		return
+	}
+
+	return
+}
+
+type subtotalQueryOption func(*ent.SubtotalQuery)
+
+func loadSubtotalChildren() (option subtotalQueryOption) {
+	option = func(query *ent.SubtotalQuery) {
+		query = query.WithChildren()
+
 		return
 	}
 

@@ -73,6 +73,9 @@ func initialiseSubtotalScenarios(ctx *godog.ScenarioContext) {
 	ctx.Step(`^we PATCH a Subtotal named "(.+)" with new parent "(.+)"$`,
 		patchSubtotalWithNewParent,
 	)
+	ctx.Step(`^we DELETE a Subtotal named "(.+)"$`,
+		deleteSubtotal,
+	)
 
 	return
 }
@@ -279,6 +282,37 @@ func shouldSeeSubtotalWithNoParent(parentContext context.Context, name string) (
 		name,
 		subtotalNilParentName,
 	)
+}
+
+func deleteSubtotal(parentContext context.Context, name string) (
+	childContext context.Context, e error,
+) {
+	var (
+		response *resty.Response
+		subtotal Subtotal
+	)
+
+	childContext = parentContext
+
+	response, e = testutils.RESTClient.R().
+		SetQueryParam("Name", name).
+		SetResult(&subtotal).
+		Delete(subtotalURL)
+	if e != nil {
+		return
+	}
+
+	childContext = context.WithValue(parentContext,
+		subtotalHTTPResponseContextKey{},
+		response,
+	)
+
+	childContext = context.WithValue(childContext,
+		subtotalHTTPResponseParsedContextKey{},
+		subtotal,
+	)
+
+	return
 }
 
 func _getSubtotalByName(name string) (
