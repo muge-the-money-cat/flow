@@ -167,7 +167,7 @@ func postSubtotalWithParent(parentContext context.Context,
 func postSubtotalWithNoParent(parentContext context.Context, name string) (
 	context.Context, error,
 ) {
-	return postSubtotalWithParent(parentContext, name, subtotalNilParentName)
+	return postSubtotalWithParent(parentContext, name, nilSubtotalParentName)
 }
 
 func shouldSeeSubtotalWithParent(parentContext context.Context,
@@ -188,7 +188,7 @@ func shouldSeeSubtotalWithParent(parentContext context.Context,
 
 	childContext = parentContext
 
-	actual.ID = subtotalNilID
+	actual.ID = nilSubtotalID
 
 	e = testutils.Verify(assert.Equal,
 		expected,
@@ -280,7 +280,7 @@ func shouldSeeSubtotalWithNoParent(parentContext context.Context, name string) (
 ) {
 	return shouldSeeSubtotalWithParent(parentContext,
 		name,
-		subtotalNilParentName,
+		nilSubtotalParentName,
 	)
 }
 

@@ -10,9 +10,9 @@ import (
 )
 
 const (
-	subtotalNilID         = 0
-	subtotalNilName       = ""
-	subtotalNilParentName = ""
+	nilSubtotalID         = 0
+	nilSubtotalName       = ""
+	nilSubtotalParentName = ""
 	subtotalSubpath       = "subtotal"
 )
 
@@ -76,7 +76,7 @@ func (server *flowHTTPAPIV1Server) postSubtotal(ginContext *gin.Context) {
 	create = server.entClient.Subtotal.Create().
 		SetName(s.Name)
 
-	if s.ParentName != subtotalNilParentName {
+	if s.ParentName != nilSubtotalParentName {
 		q, e = server.getSubtotalByName(ginContext, s.ParentName)
 		if e != nil {
 			server.handleError(ginContext, e)
@@ -137,11 +137,11 @@ func (server *flowHTTPAPIV1Server) patchSubtotal(ginContext *gin.Context) {
 
 	update = server.entClient.Subtotal.UpdateOneID(s.ID)
 
-	if s.Name != subtotalNilName {
+	if s.Name != nilSubtotalName {
 		update = update.SetName(s.Name)
 	}
 
-	if s.ParentName != subtotalNilParentName {
+	if s.ParentName != nilSubtotalParentName {
 		q, e = server.getSubtotalByName(ginContext, s.ParentName)
 		if e != nil {
 			server.handleError(ginContext, e)
