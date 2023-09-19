@@ -7,7 +7,6 @@ import (
 
 	"github.com/cucumber/godog"
 	"github.com/go-resty/resty/v2"
-	_ "github.com/mattn/go-sqlite3"
 	"github.com/stretchr/testify/assert"
 
 	"github.com/muge-the-money-cat/flow/testutils"

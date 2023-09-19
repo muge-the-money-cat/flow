@@ -7,8 +7,8 @@ Feature: Account
   Scenario: POST Account
     Given an Account endpoint is available
     And a Subtotal endpoint is available
-    When we POST a Subtotal with name "Cash" and no parent
-    And we POST an Account with name "Cash on Hand" and Subtotal "Cash"
+    When we POST a Subtotal with name "Bank" and no parent
+    And we POST an Account with name "Current Account" and Subtotal "Bank"
     Then we should see HTTP response status 204
 
   Scenario: POST Account with non-existent Subtotal

@@ -21,6 +21,11 @@ const (
 )
 
 func TestMain(m *testing.M) {
+	const (
+		entDriverName = "sqlite3"
+		entSourceName = "file:ent?mode=memory&cache=shared&_fk=1"
+	)
+
 	var (
 		e        error
 		exitCode int
@@ -28,8 +33,8 @@ func TestMain(m *testing.M) {
 
 	_, e = NewFlowHTTPAPIV1Server(
 		testServerAddress,
-		testutils.EntDriverName,
-		testutils.EntSourceName,
+		entDriverName,
+		entSourceName,
 		withSubtotalEndpoint(),
 		withAccountEndpoint(),
 	)
