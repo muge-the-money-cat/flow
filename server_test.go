@@ -3,8 +3,11 @@ package main
 import (
 	"context"
 	"fmt"
+	"log"
 	"net/http"
 	"net/url"
+	"os"
+	"testing"
 
 	"github.com/go-resty/resty/v2"
 	_ "github.com/mattn/go-sqlite3"
@@ -12,6 +15,32 @@ import (
 
 	"github.com/muge-the-money-cat/flow/testutils"
 )
+
+const (
+	testServerAddress = "127.78.88.89:8080"
+)
+
+func TestMain(m *testing.M) {
+	var (
+		e        error
+		exitCode int
+	)
+
+	_, e = NewFlowHTTPAPIV1Server(
+		testServerAddress,
+		testutils.EntDriverName,
+		testutils.EntSourceName,
+		withSubtotalEndpoint(),
+		withAccountEndpoint(),
+	)
+	if e != nil {
+		log.Fatalln(e)
+	}
+
+	exitCode = m.Run()
+
+	os.Exit(exitCode)
+}
 
 func endpointURL(host, subpath string) string {
 	var (
@@ -30,7 +59,7 @@ func shouldSeeHTTPResponseStatus(parentContext context.Context, expected int) (
 ) {
 	var (
 		actual int = parentContext.Value(
-			subtotalHTTPResponseContextKey{},
+			httpResponseContextKey{},
 		).(*resty.Response).
 			StatusCode()
 	)
@@ -44,7 +73,7 @@ func shouldSeeHTTPResponseStatus(parentContext context.Context, expected int) (
 	case http.StatusInternalServerError:
 		e = fmt.Errorf(
 			parentContext.Value(
-				subtotalHTTPResponseContextKey{},
+				httpResponseContextKey{},
 			).(*resty.Response).
 				String(),
 		)
@@ -62,3 +91,8 @@ func shouldSeeHTTPResponseStatus(parentContext context.Context, expected int) (
 
 	return
 }
+
+type (
+	httpResponseContextKey       struct{}
+	httpResponseParsedContextKey struct{}
+)

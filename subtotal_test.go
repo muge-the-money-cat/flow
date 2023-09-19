@@ -14,12 +14,11 @@ import (
 )
 
 const (
-	subtotalFeatureFilePath   = "features/subtotal.feature"
-	subtotalTestServerAddress = "127.78.88.231:8080"
+	subtotalFeatureFilePath = "features/subtotal.feature"
 )
 
 var (
-	subtotalURL string = endpointURL(subtotalTestServerAddress, subtotalSubpath)
+	subtotalURL string = endpointURL(testServerAddress, subtotalSubpath)
 )
 
 func TestSubtotal(t *testing.T) {
@@ -30,19 +29,7 @@ func TestSubtotal(t *testing.T) {
 				subtotalFeatureFilePath,
 			),
 		}
-
-		e error
 	)
-
-	_, e = NewFlowHTTPAPIV1Server(
-		subtotalTestServerAddress,
-		testutils.EntDriverName,
-		testutils.EntSourceName,
-		withSubtotalEndpoint(),
-	)
-	if e != nil {
-		t.Fatal(e)
-	}
 
 	if testSuite.Run() != 0 {
 		t.Fatal()
@@ -127,12 +114,12 @@ func getSubtotalByName(parentContext context.Context, name string) (
 	}
 
 	childContext = context.WithValue(parentContext,
-		subtotalHTTPResponseContextKey{},
+		httpResponseContextKey{},
 		response,
 	)
 
 	childContext = context.WithValue(childContext,
-		subtotalHTTPResponseParsedContextKey{},
+		httpResponseParsedContextKey{},
 		subtotal,
 	)
 
@@ -163,7 +150,7 @@ func postSubtotalWithParent(parentContext context.Context,
 	}
 
 	childContext = context.WithValue(parentContext,
-		subtotalHTTPResponseContextKey{},
+		httpResponseContextKey{},
 		response,
 	)
 
@@ -188,7 +175,7 @@ func shouldSeeSubtotalWithParent(parentContext context.Context,
 		}
 
 		actual Subtotal = parentContext.Value(
-			subtotalHTTPResponseParsedContextKey{},
+			httpResponseParsedContextKey{},
 		).(Subtotal)
 	)
 
@@ -246,7 +233,7 @@ func patchSubtotalWithNewName(parentContext context.Context,
 	}
 
 	childContext = context.WithValue(parentContext,
-		subtotalHTTPResponseContextKey{},
+		httpResponseContextKey{},
 		response,
 	)
 
@@ -283,7 +270,7 @@ func patchSubtotalWithNewParent(parentContext context.Context,
 	}
 
 	childContext = context.WithValue(parentContext,
-		subtotalHTTPResponseContextKey{},
+		httpResponseContextKey{},
 		response,
 	)
 
@@ -309,12 +296,12 @@ func deleteSubtotal(parentContext context.Context, name string) (
 	}
 
 	childContext = context.WithValue(parentContext,
-		subtotalHTTPResponseContextKey{},
+		httpResponseContextKey{},
 		response,
 	)
 
 	childContext = context.WithValue(childContext,
-		subtotalHTTPResponseParsedContextKey{},
+		httpResponseParsedContextKey{},
 		subtotal,
 	)
 
@@ -334,9 +321,3 @@ func _getSubtotalByName(name string) (
 
 	return
 }
-
-type (
-	subtotalHTTPAPIContextKey            struct{}
-	subtotalHTTPResponseContextKey       struct{}
-	subtotalHTTPResponseParsedContextKey struct{}
-)

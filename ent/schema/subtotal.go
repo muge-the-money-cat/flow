@@ -27,6 +27,8 @@ func (Subtotal) Edges() (edges []ent.Edge) {
 		edge.To("children", Subtotal.Type).
 			From("parent").
 			Unique(),
+		edge.From("accounts", Account.Type).
+			Ref("subtotal"),
 	)
 
 	return
