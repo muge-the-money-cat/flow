@@ -37,6 +37,12 @@ Feature: Subtotal
     When we PATCH a Subtotal named "Assets" with new parent "Balance Sheet"
     Then we should see HTTP response status 404
 
+  Scenario: PATCH Subtotal with same name as existing
+    Given we POST a Subtotal with name "Machinery" and no parent
+    And we POST a Subtotal with name "Plant" and no parent
+    When we PATCH a Subtotal named "Plant" with new name "Machinery"
+    Then we should see HTTP response status 409
+
   Scenario: PATCH Subtotal with new name and then GET by new name
     Given we POST a Subtotal with name "Depreciation" and no parent
     When we PATCH a Subtotal named "Depreciation" with new name "Amortisation"
