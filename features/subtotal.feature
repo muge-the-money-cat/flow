@@ -17,15 +17,15 @@ Feature: Subtotal
     And we should see a Subtotal with name "Profit & Loss" and no parent
 
   Scenario: POST Subtotal with parent and then GET
-    When we POST a Subtotal with name "Current Assets" and no parent
-    And we POST a Subtotal with name "Cash" and parent "Current Assets"
+    Given we POST a Subtotal with name "Current Assets" and no parent
+    When we POST a Subtotal with name "Cash" and parent "Current Assets"
     And we GET a Subtotal by name "Cash"
     Then we should see HTTP response status 200
     And we should see a Subtotal with name "Cash" and parent "Current Assets"
 
-  Scenario: POST Subtotal and then POST another Subtotal with same name
+  Scenario: POST Subtotal with same name as existing
+    Given we POST a Subtotal with name "Liabilities" and no parent
     When we POST a Subtotal with name "Liabilities" and no parent
-    And we POST a Subtotal with name "Liabilities" and no parent
     Then we should see HTTP response status 409
 
   Scenario: PATCH Subtotal
@@ -77,6 +77,6 @@ Feature: Subtotal
 
   Scenario: DELETE Subtotal with existing child
     Given we POST a Subtotal with name "Payables" and no parent
-    When we POST a Subtotal with name "Notes Payable" and parent "Payables"
-    And we DELETE a Subtotal named "Payables"
+    And we POST a Subtotal with name "Notes Payable" and parent "Payables"
+    When we DELETE a Subtotal named "Payables"
     Then we should see HTTP response status 409
