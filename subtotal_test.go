@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"net/http"
-	"testing"
 
 	"github.com/cucumber/godog"
 	"github.com/go-resty/resty/v2"
@@ -12,30 +11,9 @@ import (
 	"github.com/muge-the-money-cat/flow/testutils"
 )
 
-const (
-	subtotalFeatureFilePath = "features/subtotal.feature"
-)
-
 var (
-	subtotalURL string = endpointURL(testServerAddress, subtotalSubpath)
+	subtotalURL string = testutils.EndpointURL(basePath, subtotalSubpath)
 )
-
-func TestSubtotal(t *testing.T) {
-	var (
-		testSuite = godog.TestSuite{
-			ScenarioInitializer: initialiseSubtotalScenarios,
-			Options: testutils.GodogOptions(
-				subtotalFeatureFilePath,
-			),
-		}
-	)
-
-	if testSuite.Run() != 0 {
-		t.Fatal()
-	}
-
-	return
-}
 
 func initialiseSubtotalScenarios(ctx *godog.ScenarioContext) {
 	ctx.Step(`^a Subtotal endpoint is available$`,
@@ -43,9 +21,6 @@ func initialiseSubtotalScenarios(ctx *godog.ScenarioContext) {
 	)
 	ctx.Step(`^we GET a Subtotal by name "(.+)"$`,
 		getSubtotalByName,
-	)
-	ctx.Step(`^we should see HTTP response status (\d{3})$`,
-		shouldSeeHTTPResponseStatus,
 	)
 	ctx.Step(`^we POST a Subtotal with name "(.+)" and no parent$`,
 		postSubtotalWithNoParent,

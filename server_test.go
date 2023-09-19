@@ -5,10 +5,11 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"net/url"
 	"os"
 	"testing"
 
+	"github.com/cucumber/godog"
+	"github.com/cucumber/godog/colors"
 	"github.com/go-resty/resty/v2"
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/stretchr/testify/assert"
@@ -16,23 +17,32 @@ import (
 	"github.com/muge-the-money-cat/flow/testutils"
 )
 
-const (
-	testServerAddress = "127.78.88.89:8080"
+type (
+	httpResponseContextKey       struct{}
+	httpResponseParsedContextKey struct{}
 )
 
-func TestMain(m *testing.M) {
+func TestFlowHTTPAPIV1Server(t *testing.T) {
 	const (
 		entDriverName = "sqlite3"
 		entSourceName = "file:ent?mode=memory&cache=shared&_fk=1"
 	)
 
 	var (
-		e        error
-		exitCode int
+		godogOptions = &godog.Options{
+			Output: colors.Colored(os.Stdout),
+			Format: "pretty",
+		}
+		testSuite = godog.TestSuite{
+			ScenarioInitializer: initialiseScenarios,
+			Options:             godogOptions,
+		}
+
+		e error
 	)
 
 	_, e = NewFlowHTTPAPIV1Server(
-		testServerAddress,
+		testutils.TestServerAddress,
 		entDriverName,
 		entSourceName,
 		withSubtotalEndpoint(),
@@ -42,21 +52,27 @@ func TestMain(m *testing.M) {
 		log.Fatalln(e)
 	}
 
-	exitCode = m.Run()
+	if testSuite.Run() != 0 {
+		t.Fatal()
+	}
 
-	os.Exit(exitCode)
+	return
 }
 
-func endpointURL(host, subpath string) string {
-	var (
-		base = &url.URL{
-			Scheme: "http",
-			Host:   host,
-			Path:   basePath,
-		}
+func initialiseScenarios(ctx *godog.ScenarioContext) {
+	initialiseAccountScenarios(ctx)
+	initialiseGenericScenarios(ctx)
+	initialiseSubtotalScenarios(ctx)
+
+	return
+}
+
+func initialiseGenericScenarios(ctx *godog.ScenarioContext) {
+	ctx.Step(`^we should see HTTP response status (\d{3})$`,
+		shouldSeeHTTPResponseStatus,
 	)
 
-	return base.JoinPath(subpath).String()
+	return
 }
 
 func shouldSeeHTTPResponseStatus(parentContext context.Context, expected int) (
@@ -96,8 +112,3 @@ func shouldSeeHTTPResponseStatus(parentContext context.Context, expected int) (
 
 	return
 }
-
-type (
-	httpResponseContextKey       struct{}
-	httpResponseParsedContextKey struct{}
-)

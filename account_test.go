@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"net/http"
-	"testing"
 
 	"github.com/cucumber/godog"
 	"github.com/go-resty/resty/v2"
@@ -12,28 +11,9 @@ import (
 	"github.com/muge-the-money-cat/flow/testutils"
 )
 
-const (
-	accountFeatureFilePath = "features/account.feature"
-)
-
 var (
-	accountURL string = endpointURL(testServerAddress, accountSubpath)
+	accountURL string = testutils.EndpointURL(basePath, accountSubpath)
 )
-
-func TestAccount(t *testing.T) {
-	var (
-		testSuite = godog.TestSuite{
-			ScenarioInitializer: initialiseAccountScenarios,
-			Options:             testutils.GodogOptions(accountFeatureFilePath),
-		}
-	)
-
-	if testSuite.Run() != 0 {
-		t.Fatal()
-	}
-
-	return
-}
 
 func initialiseAccountScenarios(ctx *godog.ScenarioContext) {
 	ctx.Step(`^an Account endpoint is available$`,
@@ -42,17 +22,8 @@ func initialiseAccountScenarios(ctx *godog.ScenarioContext) {
 	ctx.Step(`^we GET an Account by name "(.+)"$`,
 		getAccountByName,
 	)
-	ctx.Step(`^we should see HTTP response status (\d{3})$`,
-		shouldSeeHTTPResponseStatus,
-	)
-	ctx.Step(`^we POST a Subtotal with name "(.+)" and no parent$`,
-		postSubtotalWithNoParent,
-	)
 	ctx.Step(`^we POST an Account with name "(.+)" and Subtotal "(.+)"$`,
 		postAccount,
-	)
-	ctx.Step(`^a Subtotal endpoint is available$`,
-		subtotalEndpointIsAvailable,
 	)
 	ctx.Step(`^we should see an Account with name "(.+)" and Subtotal "(.+)"$`,
 		shouldSeeAccount,
