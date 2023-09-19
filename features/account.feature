@@ -2,14 +2,15 @@ Feature: Account
   Background:
     Given an Account endpoint is available
     And a Subtotal endpoint is available
+    And we POST a Subtotal with name "Expenses" and no parent
+    And we POST a Subtotal with name "Income" and no parent
 
   Scenario: GET non-existent Account
-    When we GET an Account by name "Cash on Hand"
+    When we GET an Account by name "Advertising"
     Then we should see HTTP response status 404
 
   Scenario: POST Account
-    Given we POST a Subtotal with name "Bank" and no parent
-    When we POST an Account with name "Current Account" and Subtotal "Bank"
+    When we POST an Account with name "Entertainment" and Subtotal "Expenses"
     Then we should see HTTP response status 204
 
   Scenario: POST Account with non-existent Subtotal
@@ -17,8 +18,28 @@ Feature: Account
     Then we should see HTTP response status 404
 
   Scenario: POST Account and then GET
-    Given we POST a Subtotal with name "Inventory" and no parent
-    When we POST an Account with name "Gold" and Subtotal "Inventory"
-    And we GET an Account by name "Gold"
+    When we POST an Account with name "Insurance" and Subtotal "Expenses"
+    And we GET an Account by name "Insurance"
     Then we should see HTTP response status 200
-    And we should see an Account with name "Gold" and Subtotal "Inventory"
+    And we should see an Account with name "Insurance" and Subtotal "Expenses"
+
+  Scenario: POST Account with same name as existing
+    Given we POST an Account with name "Interest" and Subtotal "Expenses"
+    When we POST an Account with name "Interest" and Subtotal "Income"
+    Then we should see HTTP response status 409
+
+  Scenario: PATCH Account
+    Given we POST an Account with name "Telephone" and Subtotal "Expenses"
+    When we PATCH an Account named "Telephone" with new name "Internet"
+    Then we should see HTTP response status 204
+
+  Scenario: PATCH non-existent Account
+    When we PATCH an Account named "Stock" with new name "Shares"
+    Then we should see HTTP response status 404
+
+  Scenario: PATCH Account with new name and then GET by new name
+    Given we POST an Account with name "Printing" and Subtotal "Expenses"
+    When we PATCH an Account named "Printing" with new name "Stationery"
+    And we GET an Account by name "Stationery"
+    Then we should see HTTP response status 200
+    And we should see an Account with name "Stationery" and Subtotal "Expenses"

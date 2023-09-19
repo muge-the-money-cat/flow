@@ -28,6 +28,9 @@ func initialiseAccountScenarios(ctx *godog.ScenarioContext) {
 	ctx.Step(`^we should see an Account with name "(.+)" and Subtotal "(.+)"$`,
 		shouldSeeAccount,
 	)
+	ctx.Step(`^we PATCH an Account named "(.+)" with new name "(.+)"$`,
+		patchAccountWithNewName,
+	)
 
 	return
 }
@@ -132,6 +135,8 @@ func shouldSeeAccount(parentContext context.Context,
 
 	childContext = parentContext
 
+	actual.ID = nilAccountID
+
 	e = testutils.Verify(assert.Equal,
 		expected,
 		actual,
@@ -139,6 +144,43 @@ func shouldSeeAccount(parentContext context.Context,
 	if e != nil {
 		return
 	}
+
+	return
+}
+
+func patchAccountWithNewName(parentContext context.Context,
+	name, newName string,
+) (
+	childContext context.Context, e error,
+) {
+	var (
+		account  Account
+		response *resty.Response
+	)
+
+	childContext = parentContext
+
+	response, account, e = _getAccountByName(name)
+	if e != nil {
+		return
+	}
+
+	account = Account{
+		ID:   account.ID,
+		Name: newName,
+	}
+
+	response, e = testutils.RESTClient.R().
+		SetBody(account).
+		Patch(accountURL)
+	if e != nil {
+		return
+	}
+
+	childContext = context.WithValue(parentContext,
+		httpResponseContextKey{},
+		response,
+	)
 
 	return
 }
