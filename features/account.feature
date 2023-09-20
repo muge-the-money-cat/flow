@@ -14,7 +14,7 @@ Feature: Account
     Then we should see HTTP response status 204
 
   Scenario: POST Account with non-existent Subtotal
-    When we POST an Account with name "Capital" and Subtotal "Equity"
+    When we POST an Account with name "Gold" and Subtotal "Assets"
     Then we should see HTTP response status 404
 
   Scenario: POST Account and then GET
@@ -64,8 +64,8 @@ Feature: Account
     And we should see an Account with name "Rent" and Subtotal "Income"
 
   Scenario: PATCH Account with non-existent Subtotal
-    Given we POST an Account with name "Retained Losses" and Subtotal "Expenses"
-    When we PATCH an Account named "Retained Losses" with new Subtotal "Equity"
+    Given we POST an Account with name "Prepaid Rent" and Subtotal "Expenses"
+    When we PATCH an Account named "Prepaid Rent" with new Subtotal "Assets"
     Then we should see HTTP response status 404
 
   Scenario: DELETE Account
