@@ -65,6 +65,11 @@ Feature: Subtotal
     Then we should see HTTP response status 200
     And we should see a Subtotal with name "Discounts" and parent "Revenues"
 
+  Scenario: PATCH Subtotal with non-existent parent
+    Given we POST a Subtotal with name "Gold" and no parent
+    When we PATCH a Subtotal named "Gold" with new parent "Assets"
+    Then we should see HTTP response status 404
+
   Scenario: DELETE Subtotal
     Given we POST a Subtotal with name "Loans Payable" and no parent
     When we DELETE a Subtotal named "Loans Payable"

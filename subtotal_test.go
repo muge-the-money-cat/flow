@@ -189,7 +189,7 @@ func patchSubtotalWithNewName(parentContext context.Context,
 
 	childContext = parentContext
 
-	response, subtotal, e = _getSubtotalByName(name)
+	_, subtotal, e = _getSubtotalByName(name)
 	if e != nil {
 		return
 	}
@@ -226,7 +226,7 @@ func patchSubtotalWithNewParent(parentContext context.Context,
 
 	childContext = parentContext
 
-	response, subtotal, e = _getSubtotalByName(name)
+	_, subtotal, e = _getSubtotalByName(name)
 	if e != nil {
 		return
 	}
