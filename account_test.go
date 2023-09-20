@@ -31,6 +31,9 @@ func initialiseAccountScenarios(ctx *godog.ScenarioContext) {
 	ctx.Step(`^we PATCH an Account named "(.+)" with new name "(.+)"$`,
 		patchAccountWithNewName,
 	)
+	ctx.Step(`^we PATCH an Account named "(.+)" with new Subtotal "(.+)"$`,
+		patchAccountWithNewSubtotal,
+	)
 
 	return
 }
@@ -160,7 +163,7 @@ func patchAccountWithNewName(parentContext context.Context,
 
 	childContext = parentContext
 
-	response, account, e = _getAccountByName(name)
+	_, account, e = _getAccountByName(name)
 	if e != nil {
 		return
 	}
@@ -168,6 +171,43 @@ func patchAccountWithNewName(parentContext context.Context,
 	account = Account{
 		ID:   account.ID,
 		Name: newName,
+	}
+
+	response, e = testutils.RESTClient.R().
+		SetBody(account).
+		Patch(accountURL)
+	if e != nil {
+		return
+	}
+
+	childContext = context.WithValue(parentContext,
+		httpResponseContextKey{},
+		response,
+	)
+
+	return
+}
+
+func patchAccountWithNewSubtotal(parentContext context.Context,
+	name, newSubtotalName string,
+) (
+	childContext context.Context, e error,
+) {
+	var (
+		account  Account
+		response *resty.Response
+	)
+
+	childContext = parentContext
+
+	_, account, e = _getAccountByName(name)
+	if e != nil {
+		return
+	}
+
+	account = Account{
+		ID:           account.ID,
+		SubtotalName: newSubtotalName,
 	}
 
 	response, e = testutils.RESTClient.R().

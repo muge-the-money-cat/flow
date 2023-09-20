@@ -37,9 +37,33 @@ Feature: Account
     When we PATCH an Account named "Stock" with new name "Shares"
     Then we should see HTTP response status 404
 
+  Scenario: PATCH Account with same name as existing
+    Given we POST an Account with name "Salaries" and Subtotal "Expenses"
+    And we POST an Account with name "Wages" and Subtotal "Expenses"
+    When we PATCH an Account named "Wages" with new name "Salaries"
+    Then we should see HTTP response status 409
+
   Scenario: PATCH Account with new name and then GET by new name
     Given we POST an Account with name "Printing" and Subtotal "Expenses"
     When we PATCH an Account named "Printing" with new name "Stationery"
     And we GET an Account by name "Stationery"
     Then we should see HTTP response status 200
     And we should see an Account with name "Stationery" and Subtotal "Expenses"
+
+  Scenario: PATCH Account with new name and then GET by old name
+    Given we POST an Account with name "Audit" and Subtotal "Expenses"
+    When we PATCH an Account named "Audit" with new name "Professional Services"
+    And we GET an Account by name "Audit"
+    Then we should see HTTP response status 404
+
+  Scenario: PATCH Account with new Subtotal and then GET
+    Given we POST an Account with name "Rent" and Subtotal "Expenses"
+    When we PATCH an Account named "Rent" with new Subtotal "Income"
+    And we GET an Account by name "Rent"
+    Then we should see HTTP response status 200
+    And we should see an Account with name "Rent" and Subtotal "Income"
+
+  Scenario: PATCH Account with non-existent Subtotal
+    Given we POST an Account with name "Retained Losses" and Subtotal "Expenses"
+    When we PATCH an Account named "Retained Losses" with new Subtotal "Equity"
+    Then we should see HTTP response status 404

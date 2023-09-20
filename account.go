@@ -10,9 +10,10 @@ import (
 )
 
 const (
-	accountSubpath = "account"
-	nilAccountID   = 0
-	nilAccountName = ""
+	accountSubpath         = "account"
+	nilAccountID           = 0
+	nilAccountName         = ""
+	nilAccountSubtotalName = ""
 )
 
 type Account struct {
@@ -117,6 +118,7 @@ func (server *flowHTTPAPIV1Server) patchAccount(ginContext *gin.Context) {
 	var (
 		a Account
 		e error
+		s *ent.Subtotal
 
 		update *ent.AccountUpdateOne
 	)
@@ -127,6 +129,17 @@ func (server *flowHTTPAPIV1Server) patchAccount(ginContext *gin.Context) {
 
 	if a.Name != nilAccountName {
 		update = update.SetName(a.Name)
+	}
+
+	if a.SubtotalName != nilAccountSubtotalName {
+		s, e = server.getSubtotalByName(ginContext, a.SubtotalName)
+		if e != nil {
+			server.handleError(ginContext, e)
+
+			return
+		}
+
+		update = update.SetSubtotalID(s.ID)
 	}
 
 	_, e = update.Save(
