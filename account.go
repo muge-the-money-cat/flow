@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -42,6 +43,7 @@ func withAccountEndpoint() (option flowHTTPAPIV1ServerOption) {
 
 		routerGroup.OPTIONS(root, server.accountOptions)
 
+		routerGroup.DELETE(root, server.deleteAccount)
 		routerGroup.GET(root, server.getAccount)
 		routerGroup.PATCH(root, server.patchAccount)
 		routerGroup.POST(root, server.postAccount)
@@ -67,7 +69,9 @@ func (server *flowHTTPAPIV1Server) postAccount(ginContext *gin.Context) {
 
 	ginContext.Bind(&a)
 
-	s, e = server.getSubtotalByName(ginContext, a.SubtotalName)
+	s, e = server.getSubtotalByName(a.SubtotalName,
+		ginContext.Request.Context(),
+	)
 	if e != nil {
 		server.handleError(ginContext, e)
 
@@ -100,7 +104,9 @@ func (server *flowHTTPAPIV1Server) getAccount(ginContext *gin.Context) {
 
 	ginContext.Bind(&a)
 
-	q, e = server.getAccountByName(ginContext, a.Name)
+	q, e = server.getAccountByName(a.Name,
+		ginContext.Request.Context(),
+	)
 	if e != nil {
 		server.handleError(ginContext, e)
 
@@ -132,7 +138,9 @@ func (server *flowHTTPAPIV1Server) patchAccount(ginContext *gin.Context) {
 	}
 
 	if a.SubtotalName != nilAccountSubtotalName {
-		s, e = server.getSubtotalByName(ginContext, a.SubtotalName)
+		s, e = server.getSubtotalByName(a.SubtotalName,
+			ginContext.Request.Context(),
+		)
 		if e != nil {
 			server.handleError(ginContext, e)
 
@@ -156,8 +164,43 @@ func (server *flowHTTPAPIV1Server) patchAccount(ginContext *gin.Context) {
 	return
 }
 
-func (server *flowHTTPAPIV1Server) getAccountByName(ginContext *gin.Context,
-	name string,
+func (server *flowHTTPAPIV1Server) deleteAccount(ginContext *gin.Context) {
+	var (
+		a Account
+		e error
+		q *ent.Account
+	)
+
+	ginContext.Bind(&a)
+
+	q, e = server.getAccountByName(a.Name,
+		ginContext.Request.Context(),
+	)
+	if e != nil {
+		server.handleError(ginContext, e)
+
+		return
+	}
+
+	e = server.entClient.Account.DeleteOneID(q.ID).
+		Exec(
+			ginContext.Request.Context(),
+		)
+	if e != nil {
+		server.handleError(ginContext, e)
+
+		return
+	}
+
+	a = newAccountFromEntAccount(q)
+
+	ginContext.JSON(http.StatusOK, a)
+
+	return
+}
+
+func (server *flowHTTPAPIV1Server) getAccountByName(name string,
+	ctx context.Context,
 ) (
 	q *ent.Account, e error,
 ) {
@@ -166,9 +209,7 @@ func (server *flowHTTPAPIV1Server) getAccountByName(ginContext *gin.Context,
 		Where(
 			account.Name(name),
 		).
-		Only(
-			ginContext.Request.Context(),
-		)
+		Only(ctx)
 	if e != nil {
 		return
 	}

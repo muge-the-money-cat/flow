@@ -67,3 +67,22 @@ Feature: Account
     Given we POST an Account with name "Retained Losses" and Subtotal "Expenses"
     When we PATCH an Account named "Retained Losses" with new Subtotal "Equity"
     Then we should see HTTP response status 404
+
+  Scenario: DELETE Account
+    Given we POST an Account with name "Postage" and Subtotal "Expenses"
+    When we DELETE an Account named "Postage"
+    Then we should see HTTP response status 200
+    And we should see an Account with name "Postage" and Subtotal "Expenses"
+
+  Scenario: DELETE non-existent Account
+    When we DELETE an Account named "Licenses"
+    Then we should see HTTP response status 404
+
+  Scenario: DELETE Account and then GET
+    Given we POST an Account with name "Maintenance" and Subtotal "Expenses"
+    When we DELETE an Account named "Maintenance"
+    And we GET an Account by name "Maintenance"
+    Then we should see HTTP response status 404
+
+  # TODO
+  # Scenario: DELETE Account with existing Journal Entry Line

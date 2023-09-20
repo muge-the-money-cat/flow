@@ -34,6 +34,9 @@ func initialiseAccountScenarios(ctx *godog.ScenarioContext) {
 	ctx.Step(`^we PATCH an Account named "(.+)" with new Subtotal "(.+)"$`,
 		patchAccountWithNewSubtotal,
 	)
+	ctx.Step(`^we DELETE an Account named "(.+)"$`,
+		deleteAccount,
+	)
 
 	return
 }
@@ -220,6 +223,37 @@ func patchAccountWithNewSubtotal(parentContext context.Context,
 	childContext = context.WithValue(parentContext,
 		httpResponseContextKey{},
 		response,
+	)
+
+	return
+}
+
+func deleteAccount(parentContext context.Context, name string) (
+	childContext context.Context, e error,
+) {
+	var (
+		account  Account
+		response *resty.Response
+	)
+
+	childContext = parentContext
+
+	response, e = testutils.RESTClient.R().
+		SetQueryParam("Name", name).
+		SetResult(&account).
+		Delete(accountURL)
+	if e != nil {
+		return
+	}
+
+	childContext = context.WithValue(parentContext,
+		httpResponseContextKey{},
+		response,
+	)
+
+	childContext = context.WithValue(childContext,
+		httpResponseParsedContextKey{},
+		account,
 	)
 
 	return
