@@ -20,7 +20,7 @@ func initialiseAccountScenarios(ctx *godog.ScenarioContext) {
 		accountEndpointIsAvailable,
 	)
 	ctx.Step(`^we GET Account "(.+)"$`,
-		getAccountByName,
+		getAccount,
 	)
 	ctx.Step(`^we POST Account "(.+)" with Subtotal "(.+)"$`,
 		postAccount,
@@ -29,10 +29,10 @@ func initialiseAccountScenarios(ctx *godog.ScenarioContext) {
 		shouldSeeAccount,
 	)
 	ctx.Step(`^we PATCH Account "(.+)" with new name "(.+)"$`,
-		patchAccountWithNewName,
+		patchAccountName,
 	)
 	ctx.Step(`^we PATCH Account "(.+)" with new Subtotal "(.+)"$`,
-		patchAccountWithNewSubtotal,
+		patchAccountSubtotal,
 	)
 	ctx.Step(`^we DELETE Account "(.+)"$`,
 		deleteAccount,
@@ -66,7 +66,7 @@ func accountEndpointIsAvailable(parentContext context.Context) (
 	return
 }
 
-func getAccountByName(parentContext context.Context, name string) (
+func getAccount(parentContext context.Context, name string) (
 	childContext context.Context, e error,
 ) {
 	var (
@@ -76,7 +76,7 @@ func getAccountByName(parentContext context.Context, name string) (
 
 	childContext = parentContext
 
-	response, account, e = _getAccountByName(name)
+	response, account, e = getAccountByName(name)
 	if e != nil {
 		return
 	}
@@ -154,7 +154,7 @@ func shouldSeeAccount(parentContext context.Context,
 	return
 }
 
-func patchAccountWithNewName(parentContext context.Context,
+func patchAccountName(parentContext context.Context,
 	name, newName string,
 ) (
 	childContext context.Context, e error,
@@ -166,7 +166,7 @@ func patchAccountWithNewName(parentContext context.Context,
 
 	childContext = parentContext
 
-	_, account, e = _getAccountByName(name)
+	_, account, e = getAccountByName(name)
 	if e != nil {
 		return
 	}
@@ -191,7 +191,7 @@ func patchAccountWithNewName(parentContext context.Context,
 	return
 }
 
-func patchAccountWithNewSubtotal(parentContext context.Context,
+func patchAccountSubtotal(parentContext context.Context,
 	name, newSubtotalName string,
 ) (
 	childContext context.Context, e error,
@@ -203,7 +203,7 @@ func patchAccountWithNewSubtotal(parentContext context.Context,
 
 	childContext = parentContext
 
-	_, account, e = _getAccountByName(name)
+	_, account, e = getAccountByName(name)
 	if e != nil {
 		return
 	}
@@ -259,7 +259,7 @@ func deleteAccount(parentContext context.Context, name string) (
 	return
 }
 
-func _getAccountByName(name string) (
+func getAccountByName(name string) (
 	response *resty.Response, account Account, e error,
 ) {
 	response, e = testutils.RESTClient.R().

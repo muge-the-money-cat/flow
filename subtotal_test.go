@@ -20,7 +20,7 @@ func initialiseSubtotalScenarios(ctx *godog.ScenarioContext) {
 		subtotalEndpointIsAvailable,
 	)
 	ctx.Step(`^we GET Subtotal "(.+)"$`,
-		getSubtotalByName,
+		getSubtotal,
 	)
 	ctx.Step(`^we POST Subtotal "(.+)" with no parent$`,
 		postSubtotalWithNoParent,
@@ -35,10 +35,10 @@ func initialiseSubtotalScenarios(ctx *godog.ScenarioContext) {
 		shouldSeeSubtotalWithParent,
 	)
 	ctx.Step(`^we PATCH Subtotal "(.+)" with new name "(.+)"$`,
-		patchSubtotalWithNewName,
+		patchSubtotalName,
 	)
 	ctx.Step(`^we PATCH Subtotal "(.+)" with new parent "(.+)"$`,
-		patchSubtotalWithNewParent,
+		patchSubtotalParent,
 	)
 	ctx.Step(`^we DELETE Subtotal "(.+)"$`,
 		deleteSubtotal,
@@ -72,7 +72,7 @@ func subtotalEndpointIsAvailable(parentContext context.Context) (
 	return
 }
 
-func getSubtotalByName(parentContext context.Context, name string) (
+func getSubtotal(parentContext context.Context, name string) (
 	childContext context.Context, e error,
 ) {
 	var (
@@ -82,7 +82,7 @@ func getSubtotalByName(parentContext context.Context, name string) (
 
 	childContext = parentContext
 
-	response, subtotal, e = _getSubtotalByName(name)
+	response, subtotal, e = getSubtotalByName(name)
 	if e != nil {
 		return
 	}
@@ -177,7 +177,7 @@ func shouldSeeSubtotalWithNoParent(parentContext context.Context, name string) (
 	)
 }
 
-func patchSubtotalWithNewName(parentContext context.Context,
+func patchSubtotalName(parentContext context.Context,
 	name, newName string,
 ) (
 	childContext context.Context, e error,
@@ -189,7 +189,7 @@ func patchSubtotalWithNewName(parentContext context.Context,
 
 	childContext = parentContext
 
-	_, subtotal, e = _getSubtotalByName(name)
+	_, subtotal, e = getSubtotalByName(name)
 	if e != nil {
 		return
 	}
@@ -214,7 +214,7 @@ func patchSubtotalWithNewName(parentContext context.Context,
 	return
 }
 
-func patchSubtotalWithNewParent(parentContext context.Context,
+func patchSubtotalParent(parentContext context.Context,
 	name, newParentName string,
 ) (
 	childContext context.Context, e error,
@@ -226,7 +226,7 @@ func patchSubtotalWithNewParent(parentContext context.Context,
 
 	childContext = parentContext
 
-	_, subtotal, e = _getSubtotalByName(name)
+	_, subtotal, e = getSubtotalByName(name)
 	if e != nil {
 		return
 	}
@@ -282,7 +282,7 @@ func deleteSubtotal(parentContext context.Context, name string) (
 	return
 }
 
-func _getSubtotalByName(name string) (
+func getSubtotalByName(name string) (
 	response *resty.Response, subtotal Subtotal, e error,
 ) {
 	response, e = testutils.RESTClient.R().
