@@ -92,5 +92,9 @@ Feature: Subtotal
     When we DELETE a Subtotal named "Payables"
     Then we should see HTTP response status 409
 
-  # TODO
-  # Scenario: DELETE Subtotal with existing Account
+  Scenario: DELETE Subtotal with existing Account
+    Given an Account endpoint is available
+    And we POST a Subtotal with name "Shares" and no parent
+    And we POST an Account with name "Preferred Shares" and Subtotal "Shares"
+    When we DELETE a Subtotal named "Shares"
+    Then we should see HTTP response status 409
