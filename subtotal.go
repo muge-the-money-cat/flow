@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -77,7 +78,9 @@ func (server *flowHTTPAPIV1Server) postSubtotal(ginContext *gin.Context) {
 		SetName(s.Name)
 
 	if s.ParentName != nilSubtotalParentName {
-		q, e = server.getSubtotalByName(ginContext, s.ParentName)
+		q, e = server.getSubtotalByName(s.ParentName,
+			ginContext.Request.Context(),
+		)
 		if e != nil {
 			server.handleError(ginContext, e)
 
@@ -110,7 +113,9 @@ func (server *flowHTTPAPIV1Server) getSubtotal(ginContext *gin.Context) {
 
 	ginContext.Bind(&s)
 
-	q, e = server.getSubtotalByName(ginContext, s.Name)
+	q, e = server.getSubtotalByName(s.Name,
+		ginContext.Request.Context(),
+	)
 	if e != nil {
 		server.handleError(ginContext, e)
 
@@ -142,7 +147,9 @@ func (server *flowHTTPAPIV1Server) patchSubtotal(ginContext *gin.Context) {
 	}
 
 	if s.ParentName != nilSubtotalParentName {
-		q, e = server.getSubtotalByName(ginContext, s.ParentName)
+		q, e = server.getSubtotalByName(s.ParentName,
+			ginContext.Request.Context(),
+		)
 		if e != nil {
 			server.handleError(ginContext, e)
 
@@ -175,7 +182,8 @@ func (server *flowHTTPAPIV1Server) deleteSubtotal(ginContext *gin.Context) {
 
 	ginContext.Bind(&s)
 
-	q, e = server.getSubtotalByName(ginContext, s.Name,
+	q, e = server.getSubtotalByName(s.Name,
+		ginContext.Request.Context(),
 		loadSubtotalChildren(),
 	)
 	if e != nil {
@@ -207,8 +215,8 @@ func (server *flowHTTPAPIV1Server) deleteSubtotal(ginContext *gin.Context) {
 	return
 }
 
-func (server *flowHTTPAPIV1Server) getSubtotalByName(ginContext *gin.Context,
-	name string, options ...subtotalQueryOption,
+func (server *flowHTTPAPIV1Server) getSubtotalByName(name string,
+	ctx context.Context, options ...subtotalQueryOption,
 ) (
 	q *ent.Subtotal, e error,
 ) {
@@ -227,9 +235,7 @@ func (server *flowHTTPAPIV1Server) getSubtotalByName(ginContext *gin.Context,
 		option(query)
 	}
 
-	q, e = query.Only(
-		ginContext.Request.Context(),
-	)
+	q, e = query.Only(ctx)
 	if e != nil {
 		return
 	}
