@@ -106,8 +106,19 @@ func (server *flowHTTPAPIV1Server) listenAndServe(address string) (e error) {
 	return
 }
 
-func (*flowHTTPAPIV1Server) handleError(c *gin.Context, e error) {
+func (*flowHTTPAPIV1Server) handleError(c *gin.Context, pointer *error) {
+	var (
+		e error = *pointer
+		// NOTE: This DEFERRED function takes a pointer argument because
+		// > A deferred function's arguments are evaluated
+		// > when the defer statement is evaluated.
+		// (https://go.dev/blog/defer-panic-and-recover)
+	)
+
 	switch {
+	case e == nil:
+		return
+
 	case ent.IsNotFound(e):
 		c.Status(http.StatusNotFound)
 

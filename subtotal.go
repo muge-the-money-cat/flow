@@ -72,6 +72,8 @@ func (server *flowHTTPAPIV1Server) postSubtotal(ginContext *gin.Context) {
 		create *ent.SubtotalCreate
 	)
 
+	defer server.handleError(ginContext, &e)
+
 	ginContext.Bind(&s)
 
 	create = server.entClient.Subtotal.Create().
@@ -82,8 +84,6 @@ func (server *flowHTTPAPIV1Server) postSubtotal(ginContext *gin.Context) {
 			ginContext.Request.Context(),
 		)
 		if e != nil {
-			server.handleError(ginContext, e)
-
 			return
 		}
 
@@ -94,8 +94,6 @@ func (server *flowHTTPAPIV1Server) postSubtotal(ginContext *gin.Context) {
 		ginContext.Request.Context(),
 	)
 	if e != nil {
-		server.handleError(ginContext, e)
-
 		return
 	}
 
@@ -111,14 +109,14 @@ func (server *flowHTTPAPIV1Server) getSubtotal(ginContext *gin.Context) {
 		s Subtotal
 	)
 
+	defer server.handleError(ginContext, &e)
+
 	ginContext.Bind(&s)
 
 	q, e = server.getSubtotalByName(s.Name,
 		ginContext.Request.Context(),
 	)
 	if e != nil {
-		server.handleError(ginContext, e)
-
 		return
 	}
 
@@ -138,6 +136,8 @@ func (server *flowHTTPAPIV1Server) patchSubtotal(ginContext *gin.Context) {
 		update *ent.SubtotalUpdateOne
 	)
 
+	defer server.handleError(ginContext, &e)
+
 	ginContext.Bind(&s)
 
 	update = server.entClient.Subtotal.UpdateOneID(s.ID)
@@ -151,8 +151,6 @@ func (server *flowHTTPAPIV1Server) patchSubtotal(ginContext *gin.Context) {
 			ginContext.Request.Context(),
 		)
 		if e != nil {
-			server.handleError(ginContext, e)
-
 			return
 		}
 
@@ -163,8 +161,6 @@ func (server *flowHTTPAPIV1Server) patchSubtotal(ginContext *gin.Context) {
 		ginContext.Request.Context(),
 	)
 	if e != nil {
-		server.handleError(ginContext, e)
-
 		return
 	}
 
@@ -180,6 +176,8 @@ func (server *flowHTTPAPIV1Server) deleteSubtotal(ginContext *gin.Context) {
 		s Subtotal
 	)
 
+	defer server.handleError(ginContext, &e)
+
 	ginContext.Bind(&s)
 
 	q, e = server.getSubtotalByName(s.Name,
@@ -187,8 +185,6 @@ func (server *flowHTTPAPIV1Server) deleteSubtotal(ginContext *gin.Context) {
 		loadSubtotalChildren(),
 	)
 	if e != nil {
-		server.handleError(ginContext, e)
-
 		return
 	}
 
@@ -203,8 +199,6 @@ func (server *flowHTTPAPIV1Server) deleteSubtotal(ginContext *gin.Context) {
 			ginContext.Request.Context(),
 		)
 	if e != nil {
-		server.handleError(ginContext, e)
-
 		return
 	}
 

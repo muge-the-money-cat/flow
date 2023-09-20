@@ -67,14 +67,14 @@ func (server *flowHTTPAPIV1Server) postAccount(ginContext *gin.Context) {
 		s *ent.Subtotal
 	)
 
+	defer server.handleError(ginContext, &e)
+
 	ginContext.Bind(&a)
 
 	s, e = server.getSubtotalByName(a.SubtotalName,
 		ginContext.Request.Context(),
 	)
 	if e != nil {
-		server.handleError(ginContext, e)
-
 		return
 	}
 
@@ -85,8 +85,6 @@ func (server *flowHTTPAPIV1Server) postAccount(ginContext *gin.Context) {
 			ginContext.Request.Context(),
 		)
 	if e != nil {
-		server.handleError(ginContext, e)
-
 		return
 	}
 
@@ -102,14 +100,14 @@ func (server *flowHTTPAPIV1Server) getAccount(ginContext *gin.Context) {
 		q *ent.Account
 	)
 
+	defer server.handleError(ginContext, &e)
+
 	ginContext.Bind(&a)
 
 	q, e = server.getAccountByName(a.Name,
 		ginContext.Request.Context(),
 	)
 	if e != nil {
-		server.handleError(ginContext, e)
-
 		return
 	}
 
@@ -129,6 +127,8 @@ func (server *flowHTTPAPIV1Server) patchAccount(ginContext *gin.Context) {
 		update *ent.AccountUpdateOne
 	)
 
+	defer server.handleError(ginContext, &e)
+
 	ginContext.Bind(&a)
 
 	update = server.entClient.Account.UpdateOneID(a.ID)
@@ -142,8 +142,6 @@ func (server *flowHTTPAPIV1Server) patchAccount(ginContext *gin.Context) {
 			ginContext.Request.Context(),
 		)
 		if e != nil {
-			server.handleError(ginContext, e)
-
 			return
 		}
 
@@ -154,8 +152,6 @@ func (server *flowHTTPAPIV1Server) patchAccount(ginContext *gin.Context) {
 		ginContext.Request.Context(),
 	)
 	if e != nil {
-		server.handleError(ginContext, e)
-
 		return
 	}
 
@@ -171,14 +167,14 @@ func (server *flowHTTPAPIV1Server) deleteAccount(ginContext *gin.Context) {
 		q *ent.Account
 	)
 
+	defer server.handleError(ginContext, &e)
+
 	ginContext.Bind(&a)
 
 	q, e = server.getAccountByName(a.Name,
 		ginContext.Request.Context(),
 	)
 	if e != nil {
-		server.handleError(ginContext, e)
-
 		return
 	}
 
@@ -187,8 +183,6 @@ func (server *flowHTTPAPIV1Server) deleteAccount(ginContext *gin.Context) {
 			ginContext.Request.Context(),
 		)
 	if e != nil {
-		server.handleError(ginContext, e)
-
 		return
 	}
 
