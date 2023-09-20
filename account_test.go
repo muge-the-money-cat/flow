@@ -16,25 +16,25 @@ var (
 )
 
 func initialiseAccountScenarios(ctx *godog.ScenarioContext) {
-	ctx.Step(`^an Account endpoint is available$`,
+	ctx.Step(`^Account endpoint is available$`,
 		accountEndpointIsAvailable,
 	)
-	ctx.Step(`^we GET an Account by name "(.+)"$`,
+	ctx.Step(`^we GET Account "(.+)"$`,
 		getAccountByName,
 	)
-	ctx.Step(`^we POST an Account with name "(.+)" and Subtotal "(.+)"$`,
+	ctx.Step(`^we POST Account "(.+)" with Subtotal "(.+)"$`,
 		postAccount,
 	)
-	ctx.Step(`^we should see an Account with name "(.+)" and Subtotal "(.+)"$`,
+	ctx.Step(`^we should see Account "(.+)" with Subtotal "(.+)"$`,
 		shouldSeeAccount,
 	)
-	ctx.Step(`^we PATCH an Account named "(.+)" with new name "(.+)"$`,
+	ctx.Step(`^we PATCH Account "(.+)" with new name "(.+)"$`,
 		patchAccountWithNewName,
 	)
-	ctx.Step(`^we PATCH an Account named "(.+)" with new Subtotal "(.+)"$`,
+	ctx.Step(`^we PATCH Account "(.+)" with new Subtotal "(.+)"$`,
 		patchAccountWithNewSubtotal,
 	)
-	ctx.Step(`^we DELETE an Account named "(.+)"$`,
+	ctx.Step(`^we DELETE Account "(.+)"$`,
 		deleteAccount,
 	)
 

@@ -16,31 +16,31 @@ var (
 )
 
 func initialiseSubtotalScenarios(ctx *godog.ScenarioContext) {
-	ctx.Step(`^a Subtotal endpoint is available$`,
+	ctx.Step(`^Subtotal endpoint is available$`,
 		subtotalEndpointIsAvailable,
 	)
-	ctx.Step(`^we GET a Subtotal by name "(.+)"$`,
+	ctx.Step(`^we GET Subtotal "(.+)"$`,
 		getSubtotalByName,
 	)
-	ctx.Step(`^we POST a Subtotal with name "(.+)" and no parent$`,
+	ctx.Step(`^we POST Subtotal "(.+)" with no parent$`,
 		postSubtotalWithNoParent,
 	)
-	ctx.Step(`^we should see a Subtotal with name "(.+)" and no parent$`,
+	ctx.Step(`^we should see Subtotal "(.+)" with no parent$`,
 		shouldSeeSubtotalWithNoParent,
 	)
-	ctx.Step(`^we POST a Subtotal with name "(.+)" and parent "(.+)"$`,
+	ctx.Step(`^we POST Subtotal "(.+)" with parent "(.+)"$`,
 		postSubtotalWithParent,
 	)
-	ctx.Step(`^we should see a Subtotal with name "(.+)" and parent "(.+)"$`,
+	ctx.Step(`^we should see Subtotal "(.+)" with parent "(.+)"$`,
 		shouldSeeSubtotalWithParent,
 	)
-	ctx.Step(`^we PATCH a Subtotal named "(.+)" with new name "(.+)"$`,
+	ctx.Step(`^we PATCH Subtotal "(.+)" with new name "(.+)"$`,
 		patchSubtotalWithNewName,
 	)
-	ctx.Step(`^we PATCH a Subtotal named "(.+)" with new parent "(.+)"$`,
+	ctx.Step(`^we PATCH Subtotal "(.+)" with new parent "(.+)"$`,
 		patchSubtotalWithNewParent,
 	)
-	ctx.Step(`^we DELETE a Subtotal named "(.+)"$`,
+	ctx.Step(`^we DELETE Subtotal "(.+)"$`,
 		deleteSubtotal,
 	)
 
