@@ -91,3 +91,6 @@ Feature: Subtotal
     And we POST a Subtotal with name "Notes Payable" and parent "Payables"
     When we DELETE a Subtotal named "Payables"
     Then we should see HTTP response status 409
+
+  # TODO
+  # Scenario: DELETE Subtotal with existing Account
