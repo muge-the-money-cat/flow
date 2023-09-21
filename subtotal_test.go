@@ -10,6 +10,10 @@ import (
 	"github.com/muge-the-money-cat/flow/testutils"
 )
 
+const (
+	subtotalQueryParamName = "Name"
+)
+
 var (
 	subtotalURL string = testutils.EndpointURL(basePath, subtotalSubpath)
 )
@@ -236,7 +240,7 @@ func deleteSubtotal(parentContext context.Context, name string) (
 	childContext = parentContext
 
 	response, e = testutils.RESTClient.R().
-		SetQueryParam("Name", name).
+		SetQueryParam(subtotalQueryParamName, name).
 		SetResult(&subtotal).
 		Delete(subtotalURL)
 	if e != nil {
@@ -260,7 +264,7 @@ func getSubtotalByName(name string) (
 	response *resty.Response, subtotal Subtotal, e error,
 ) {
 	response, e = testutils.RESTClient.R().
-		SetQueryParam("Name", name).
+		SetQueryParam(subtotalQueryParamName, name).
 		SetResult(&subtotal).
 		Get(subtotalURL)
 	if e != nil {

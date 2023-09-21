@@ -10,6 +10,10 @@ import (
 	"github.com/muge-the-money-cat/flow/testutils"
 )
 
+const (
+	accountQueryParamName = "Name"
+)
+
 var (
 	accountURL string = testutils.EndpointURL(basePath, accountSubpath)
 )
@@ -213,7 +217,7 @@ func deleteAccount(parentContext context.Context, name string) (
 	childContext = parentContext
 
 	response, e = testutils.RESTClient.R().
-		SetQueryParam("Name", name).
+		SetQueryParam(accountQueryParamName, name).
 		SetResult(&account).
 		Delete(accountURL)
 	if e != nil {
@@ -237,7 +241,7 @@ func getAccountByName(name string) (
 	response *resty.Response, account Account, e error,
 ) {
 	response, e = testutils.RESTClient.R().
-		SetQueryParam("Name", name).
+		SetQueryParam(accountQueryParamName, name).
 		SetResult(&account).
 		Get(accountURL)
 	if e != nil {
