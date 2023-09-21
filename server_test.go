@@ -45,8 +45,9 @@ func TestFlowHTTPAPIV1Server(t *testing.T) {
 		testutils.TestServerAddress,
 		entDriverName,
 		entSourceName,
-		withSubtotalEndpoint(),
 		withAccountEndpoint(),
+		withChartEndpoint(),
+		withSubtotalEndpoint(),
 	)
 	if e != nil {
 		log.Fatalln(e)

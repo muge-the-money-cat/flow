@@ -248,3 +248,13 @@ func loadSubtotalChildren() (option subtotalQueryOption) {
 
 	return
 }
+
+func loadSubtotalAccounts() (option subtotalQueryOption) {
+	option = func(query *ent.SubtotalQuery) {
+		query = query.WithAccounts()
+
+		return
+	}
+
+	return
+}

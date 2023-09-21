@@ -6,18 +6,18 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func Verify(assertion assertionFunc, expected, actual interface{}) (e error) {
+func Verify(assertion assertionFunc, iface0, iface1 interface{}) (e error) {
 	var (
 		t testingT
 	)
 
-	assertion(&t, expected, actual)
+	assertion(&t, iface0, iface1)
 
 	return t.e
 }
 
 type assertionFunc func(
-	t assert.TestingT, expected, actual interface{}, msgAndArgs ...interface{},
+	assert.TestingT, interface{}, interface{}, ...interface{},
 ) bool
 
 type testingT struct {
