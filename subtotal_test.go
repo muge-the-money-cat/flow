@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"net/http"
 
 	"github.com/cucumber/godog"
 	"github.com/go-resty/resty/v2"
@@ -17,7 +16,7 @@ var (
 
 func initialiseSubtotalScenarios(ctx *godog.ScenarioContext) {
 	ctx.Step(`^Subtotal endpoint is available$`,
-		subtotalEndpointIsAvailable,
+		newEndpointAvailableScenarioStep(subtotalURL),
 	)
 	ctx.Step(`^we GET Subtotal "(.+)"$`,
 		getSubtotal,
@@ -43,31 +42,6 @@ func initialiseSubtotalScenarios(ctx *godog.ScenarioContext) {
 	ctx.Step(`^we DELETE Subtotal "(.+)"$`,
 		deleteSubtotal,
 	)
-
-	return
-}
-
-func subtotalEndpointIsAvailable(parentContext context.Context) (
-	childContext context.Context, e error,
-) {
-	var (
-		response *resty.Response
-	)
-
-	childContext = parentContext
-
-	response, e = testutils.RESTClient.R().Options(subtotalURL)
-	if e != nil {
-		return
-	}
-
-	e = testutils.Verify(assert.Equal,
-		http.StatusNoContent,
-		response.StatusCode(),
-	)
-	if e != nil {
-		return
-	}
 
 	return
 }

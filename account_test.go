@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"net/http"
 
 	"github.com/cucumber/godog"
 	"github.com/go-resty/resty/v2"
@@ -17,7 +16,7 @@ var (
 
 func initialiseAccountScenarios(ctx *godog.ScenarioContext) {
 	ctx.Step(`^Account endpoint is available$`,
-		accountEndpointIsAvailable,
+		newEndpointAvailableScenarioStep(accountURL),
 	)
 	ctx.Step(`^we GET Account "(.+)"$`,
 		getAccount,
@@ -37,31 +36,6 @@ func initialiseAccountScenarios(ctx *godog.ScenarioContext) {
 	ctx.Step(`^we DELETE Account "(.+)"$`,
 		deleteAccount,
 	)
-
-	return
-}
-
-func accountEndpointIsAvailable(parentContext context.Context) (
-	childContext context.Context, e error,
-) {
-	var (
-		response *resty.Response
-	)
-
-	childContext = parentContext
-
-	response, e = testutils.RESTClient.R().Options(accountURL)
-	if e != nil {
-		return
-	}
-
-	e = testutils.Verify(assert.Equal,
-		http.StatusNoContent,
-		response.StatusCode(),
-	)
-	if e != nil {
-		return
-	}
 
 	return
 }

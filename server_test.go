@@ -61,6 +61,7 @@ func TestFlowHTTPAPIV1Server(t *testing.T) {
 
 func initialiseScenarios(ctx *godog.ScenarioContext) {
 	initialiseAccountScenarios(ctx)
+	initialiseChartScenarios(ctx)
 	initialiseGenericScenarios(ctx)
 	initialiseSubtotalScenarios(ctx)
 
@@ -112,3 +113,39 @@ func shouldSeeHTTPResponseStatus(parentContext context.Context, expected int) (
 
 	return
 }
+
+func newEndpointAvailableScenarioStep(url string) (
+	step endpointAvailableScenarioStep,
+) {
+	step = func(parentContext context.Context) (
+		childContext context.Context, e error,
+	) {
+		var (
+			response *resty.Response
+		)
+
+		childContext = parentContext
+
+		response, e = testutils.RESTClient.R().
+			Options(url)
+		if e != nil {
+			return
+		}
+
+		e = testutils.Verify(assert.Equal,
+			http.StatusNoContent,
+			response.StatusCode(),
+		)
+		if e != nil {
+			return
+		}
+
+		return
+	}
+
+	return
+}
+
+type endpointAvailableScenarioStep func(context.Context) (
+	context.Context, error,
+)
