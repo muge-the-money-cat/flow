@@ -38,8 +38,8 @@ type ChartEdge struct {
 	// (https://en.wikipedia.org/wiki/Graph_theory#Directed_graph)
 }
 
-func withChartEndpoint() (option flowHTTPAPIV1ServerOption) {
-	option = func(server *flowHTTPAPIV1Server) {
+func withChartEndpoint() (option flowV1HTTPAPIServerOption) {
+	option = func(server *flowV1HTTPAPIServer) {
 		var (
 			routerGroup *gin.RouterGroup = server.baseRouterGroup.Group(
 				chartSubpath,
@@ -56,13 +56,13 @@ func withChartEndpoint() (option flowHTTPAPIV1ServerOption) {
 	return
 }
 
-func (server *flowHTTPAPIV1Server) chartOptions(ginContext *gin.Context) {
+func (server *flowV1HTTPAPIServer) chartOptions(ginContext *gin.Context) {
 	ginContext.Status(http.StatusNoContent) // FIXME
 
 	return
 }
 
-func (server *flowHTTPAPIV1Server) getChart(ginContext *gin.Context) {
+func (server *flowV1HTTPAPIServer) getChart(ginContext *gin.Context) {
 	var (
 		c Chart
 		e error
@@ -83,7 +83,7 @@ func (server *flowHTTPAPIV1Server) getChart(ginContext *gin.Context) {
 	return
 }
 
-func (server *flowHTTPAPIV1Server) populateChart(chart *Chart,
+func (server *flowV1HTTPAPIServer) populateChart(chart *Chart,
 	subtotalName string, ctx context.Context,
 ) (
 	e error,

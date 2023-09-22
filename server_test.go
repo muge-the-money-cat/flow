@@ -22,7 +22,7 @@ type (
 	httpResponseParsedContextKey struct{}
 )
 
-func TestFlowHTTPAPIV1Server(t *testing.T) {
+func TestFlowV1HTTPAPIServer(t *testing.T) {
 	const (
 		entDriverName = "sqlite3"
 		entSourceName = "file:ent?mode=memory&cache=shared&_fk=1"
@@ -41,7 +41,7 @@ func TestFlowHTTPAPIV1Server(t *testing.T) {
 		e error
 	)
 
-	_, e = NewFlowHTTPAPIV1Server(
+	_, e = NewFlowV1HTTPAPIServer(
 		testutils.TestServerAddress,
 		entDriverName,
 		entSourceName,

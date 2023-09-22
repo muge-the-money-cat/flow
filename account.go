@@ -33,8 +33,8 @@ func newAccountFromEntAccount(q *ent.Account) (a Account) {
 	return
 }
 
-func withAccountEndpoint() (option flowHTTPAPIV1ServerOption) {
-	option = func(server *flowHTTPAPIV1Server) {
+func withAccountEndpoint() (option flowV1HTTPAPIServerOption) {
+	option = func(server *flowV1HTTPAPIServer) {
 		var (
 			routerGroup *gin.RouterGroup = server.baseRouterGroup.Group(
 				accountSubpath,
@@ -54,13 +54,13 @@ func withAccountEndpoint() (option flowHTTPAPIV1ServerOption) {
 	return
 }
 
-func (server *flowHTTPAPIV1Server) accountOptions(ginContext *gin.Context) {
+func (server *flowV1HTTPAPIServer) accountOptions(ginContext *gin.Context) {
 	ginContext.Status(http.StatusNoContent) // FIXME
 
 	return
 }
 
-func (server *flowHTTPAPIV1Server) postAccount(ginContext *gin.Context) {
+func (server *flowV1HTTPAPIServer) postAccount(ginContext *gin.Context) {
 	var (
 		a Account
 		e error
@@ -93,7 +93,7 @@ func (server *flowHTTPAPIV1Server) postAccount(ginContext *gin.Context) {
 	return
 }
 
-func (server *flowHTTPAPIV1Server) getAccount(ginContext *gin.Context) {
+func (server *flowV1HTTPAPIServer) getAccount(ginContext *gin.Context) {
 	var (
 		a Account
 		e error
@@ -118,7 +118,7 @@ func (server *flowHTTPAPIV1Server) getAccount(ginContext *gin.Context) {
 	return
 }
 
-func (server *flowHTTPAPIV1Server) patchAccount(ginContext *gin.Context) {
+func (server *flowV1HTTPAPIServer) patchAccount(ginContext *gin.Context) {
 	var (
 		a Account
 		e error
@@ -160,7 +160,7 @@ func (server *flowHTTPAPIV1Server) patchAccount(ginContext *gin.Context) {
 	return
 }
 
-func (server *flowHTTPAPIV1Server) deleteAccount(ginContext *gin.Context) {
+func (server *flowV1HTTPAPIServer) deleteAccount(ginContext *gin.Context) {
 	var (
 		a Account
 		e error
@@ -193,7 +193,7 @@ func (server *flowHTTPAPIV1Server) deleteAccount(ginContext *gin.Context) {
 	return
 }
 
-func (server *flowHTTPAPIV1Server) getAccountByName(name string,
+func (server *flowV1HTTPAPIServer) getAccountByName(name string,
 	ctx context.Context,
 ) (
 	q *ent.Account, e error,

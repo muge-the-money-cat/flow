@@ -36,8 +36,8 @@ func newSubtotalFromEntSubtotal(q *ent.Subtotal) (s Subtotal) {
 	return
 }
 
-func withSubtotalEndpoint() (option flowHTTPAPIV1ServerOption) {
-	option = func(server *flowHTTPAPIV1Server) {
+func withSubtotalEndpoint() (option flowV1HTTPAPIServerOption) {
+	option = func(server *flowV1HTTPAPIServer) {
 		var (
 			routerGroup *gin.RouterGroup = server.baseRouterGroup.Group(
 				subtotalSubpath,
@@ -57,13 +57,13 @@ func withSubtotalEndpoint() (option flowHTTPAPIV1ServerOption) {
 	return
 }
 
-func (server *flowHTTPAPIV1Server) subtotalOptions(ginContext *gin.Context) {
+func (server *flowV1HTTPAPIServer) subtotalOptions(ginContext *gin.Context) {
 	ginContext.Status(http.StatusNoContent) // FIXME
 
 	return
 }
 
-func (server *flowHTTPAPIV1Server) postSubtotal(ginContext *gin.Context) {
+func (server *flowV1HTTPAPIServer) postSubtotal(ginContext *gin.Context) {
 	var (
 		e error
 		q *ent.Subtotal
@@ -102,7 +102,7 @@ func (server *flowHTTPAPIV1Server) postSubtotal(ginContext *gin.Context) {
 	return
 }
 
-func (server *flowHTTPAPIV1Server) getSubtotal(ginContext *gin.Context) {
+func (server *flowV1HTTPAPIServer) getSubtotal(ginContext *gin.Context) {
 	var (
 		e error
 		q *ent.Subtotal
@@ -127,7 +127,7 @@ func (server *flowHTTPAPIV1Server) getSubtotal(ginContext *gin.Context) {
 	return
 }
 
-func (server *flowHTTPAPIV1Server) patchSubtotal(ginContext *gin.Context) {
+func (server *flowV1HTTPAPIServer) patchSubtotal(ginContext *gin.Context) {
 	var (
 		e error
 		q *ent.Subtotal
@@ -169,7 +169,7 @@ func (server *flowHTTPAPIV1Server) patchSubtotal(ginContext *gin.Context) {
 	return
 }
 
-func (server *flowHTTPAPIV1Server) deleteSubtotal(ginContext *gin.Context) {
+func (server *flowV1HTTPAPIServer) deleteSubtotal(ginContext *gin.Context) {
 	var (
 		e error
 		q *ent.Subtotal
@@ -209,7 +209,7 @@ func (server *flowHTTPAPIV1Server) deleteSubtotal(ginContext *gin.Context) {
 	return
 }
 
-func (server *flowHTTPAPIV1Server) getSubtotalByName(name string,
+func (server *flowV1HTTPAPIServer) getSubtotalByName(name string,
 	ctx context.Context, options ...subtotalQueryOption,
 ) (
 	q *ent.Subtotal, e error,

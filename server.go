@@ -15,18 +15,18 @@ const (
 	root     = "/"
 )
 
-type flowHTTPAPIV1Server struct {
+type flowV1HTTPAPIServer struct {
 	entClient       *ent.Client
 	ginEngine       *gin.Engine
 	baseRouterGroup *gin.RouterGroup
 }
 
-func NewFlowHTTPAPIV1Server(address, entDriverName, entSourceName string,
-	options ...flowHTTPAPIV1ServerOption,
+func NewFlowV1HTTPAPIServer(address, entDriverName, entSourceName string,
+	options ...flowV1HTTPAPIServerOption,
 ) (
-	server *flowHTTPAPIV1Server, e error,
+	server *flowV1HTTPAPIServer, e error,
 ) {
-	server = new(flowHTTPAPIV1Server)
+	server = new(flowV1HTTPAPIServer)
 
 	e = server.initialiseEntClient(entDriverName, entSourceName)
 	if e != nil {
@@ -45,7 +45,7 @@ func NewFlowHTTPAPIV1Server(address, entDriverName, entSourceName string,
 	return
 }
 
-func (server *flowHTTPAPIV1Server) initialiseEntClient(
+func (server *flowV1HTTPAPIServer) initialiseEntClient(
 	entDriverName, entSourceName string,
 ) (
 	e error,
@@ -65,7 +65,7 @@ func (server *flowHTTPAPIV1Server) initialiseEntClient(
 	return
 }
 
-func (server *flowHTTPAPIV1Server) initialiseGinEngine() {
+func (server *flowV1HTTPAPIServer) initialiseGinEngine() {
 	server.ginEngine = gin.Default()
 
 	server.baseRouterGroup = server.ginEngine.Group(basePath)
@@ -73,11 +73,11 @@ func (server *flowHTTPAPIV1Server) initialiseGinEngine() {
 	return
 }
 
-func (server *flowHTTPAPIV1Server) applyOptions(
-	options []flowHTTPAPIV1ServerOption,
+func (server *flowV1HTTPAPIServer) applyOptions(
+	options []flowV1HTTPAPIServerOption,
 ) {
 	var (
-		option flowHTTPAPIV1ServerOption
+		option flowV1HTTPAPIServerOption
 	)
 
 	for _, option = range options {
@@ -87,7 +87,7 @@ func (server *flowHTTPAPIV1Server) applyOptions(
 	return
 }
 
-func (server *flowHTTPAPIV1Server) listenAndServe(address string) (e error) {
+func (server *flowV1HTTPAPIServer) listenAndServe(address string) (e error) {
 	const (
 		network = "tcp"
 	)
@@ -106,7 +106,7 @@ func (server *flowHTTPAPIV1Server) listenAndServe(address string) (e error) {
 	return
 }
 
-func (*flowHTTPAPIV1Server) handleError(c *gin.Context, pointer *error) {
+func (*flowV1HTTPAPIServer) handleError(c *gin.Context, pointer *error) {
 	var (
 		e error = *pointer
 		// NOTE: This DEFERRED function takes a pointer argument because
@@ -134,4 +134,4 @@ func (*flowHTTPAPIV1Server) handleError(c *gin.Context, pointer *error) {
 	return
 }
 
-type flowHTTPAPIV1ServerOption func(*flowHTTPAPIV1Server)
+type flowV1HTTPAPIServerOption func(*flowV1HTTPAPIServer)
