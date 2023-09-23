@@ -1,4 +1,4 @@
-package main
+package flow
 
 import (
 	"context"
@@ -10,12 +10,8 @@ import (
 	"github.com/muge-the-money-cat/flow/testutils"
 )
 
-const (
-	subtotalQueryParamName = "Name"
-)
-
 var (
-	subtotalURL string = testutils.EndpointURL(basePath, subtotalSubpath)
+	subtotalURL string = testutils.EndpointURL(BasePathV1, SubtotalSubpath)
 )
 
 func initialiseSubtotalScenarios(ctx *godog.ScenarioContext) {
@@ -133,7 +129,7 @@ func shouldSeeSubtotalWithParent(parentContext context.Context,
 
 	childContext = parentContext
 
-	actual.ID = nilSubtotalID
+	actual.ID = NilSubtotalID
 
 	e = testutils.Verify(assert.Equal,
 		expected,
@@ -240,7 +236,7 @@ func deleteSubtotal(parentContext context.Context, name string) (
 	childContext = parentContext
 
 	response, e = testutils.RESTClient.R().
-		SetQueryParam(subtotalQueryParamName, name).
+		SetQueryParam(SubtotalQueryParamName, name).
 		SetResult(&subtotal).
 		Delete(subtotalURL)
 	if e != nil {
@@ -264,7 +260,7 @@ func getSubtotalByName(name string) (
 	response *resty.Response, subtotal Subtotal, e error,
 ) {
 	response, e = testutils.RESTClient.R().
-		SetQueryParam(subtotalQueryParamName, name).
+		SetQueryParam(SubtotalQueryParamName, name).
 		SetResult(&subtotal).
 		Get(subtotalURL)
 	if e != nil {

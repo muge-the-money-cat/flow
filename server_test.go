@@ -1,15 +1,12 @@
-package main
+package flow
 
 import (
 	"context"
 	"fmt"
-	"log"
 	"net/http"
-	"os"
 	"testing"
 
 	"github.com/cucumber/godog"
-	"github.com/cucumber/godog/colors"
 	"github.com/go-resty/resty/v2"
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/stretchr/testify/assert"
@@ -29,13 +26,9 @@ func TestFlowV1HTTPAPIServer(t *testing.T) {
 	)
 
 	var (
-		godogOptions = &godog.Options{
-			Output: colors.Colored(os.Stdout),
-			Format: "pretty",
-		}
 		testSuite = godog.TestSuite{
 			ScenarioInitializer: initialiseScenarios,
-			Options:             godogOptions,
+			Options:             testutils.GodogOptions,
 		}
 
 		e error
@@ -47,10 +40,10 @@ func TestFlowV1HTTPAPIServer(t *testing.T) {
 		entSourceName,
 		withAccountEndpoint(),
 		withChartEndpoint(),
-		withSubtotalEndpoint(),
+		WithSubtotalEndpoint(),
 	)
 	if e != nil {
-		log.Fatalln(e)
+		t.Fatal(e)
 	}
 
 	if testSuite.Run() != 0 {

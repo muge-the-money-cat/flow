@@ -1,4 +1,4 @@
-package main
+package flow
 
 import (
 	"context"
@@ -11,7 +11,7 @@ import (
 )
 
 var (
-	chartURL string = testutils.EndpointURL(basePath, chartSubpath)
+	chartURL string = testutils.EndpointURL(BasePathV1, chartSubpath)
 )
 
 func initialiseChartScenarios(ctx *godog.ScenarioContext) {

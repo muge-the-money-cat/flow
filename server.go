@@ -1,4 +1,4 @@
-package main
+package flow
 
 import (
 	"context"
@@ -11,8 +11,8 @@ import (
 )
 
 const (
-	basePath = "v1"
-	root     = "/"
+	BasePathV1 = "v1"
+	root       = "/"
 )
 
 type flowV1HTTPAPIServer struct {
@@ -68,7 +68,7 @@ func (server *flowV1HTTPAPIServer) initialiseEntClient(
 func (server *flowV1HTTPAPIServer) initialiseGinEngine() {
 	server.ginEngine = gin.Default()
 
-	server.baseRouterGroup = server.ginEngine.Group(basePath)
+	server.baseRouterGroup = server.ginEngine.Group(BasePathV1)
 
 	return
 }

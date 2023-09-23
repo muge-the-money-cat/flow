@@ -1,4 +1,4 @@
-package main
+package flow
 
 import (
 	"context"
@@ -15,7 +15,7 @@ const (
 )
 
 var (
-	accountURL string = testutils.EndpointURL(basePath, accountSubpath)
+	accountURL string = testutils.EndpointURL(BasePathV1, accountSubpath)
 )
 
 func initialiseAccountScenarios(ctx *godog.ScenarioContext) {

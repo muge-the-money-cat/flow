@@ -1,4 +1,4 @@
-package main
+package flow
 
 import (
 	"context"
@@ -11,10 +11,11 @@ import (
 )
 
 const (
-	nilSubtotalID         = 0
-	nilSubtotalName       = ""
-	nilSubtotalParentName = ""
-	subtotalSubpath       = "subtotal"
+	NilSubtotalID          = 0
+	SubtotalQueryParamName = "name"
+	SubtotalSubpath        = "subtotal"
+	nilSubtotalName        = ""
+	nilSubtotalParentName  = ""
 )
 
 type Subtotal struct {
@@ -36,11 +37,11 @@ func newSubtotalFromEntSubtotal(q *ent.Subtotal) (s Subtotal) {
 	return
 }
 
-func withSubtotalEndpoint() (option flowV1HTTPAPIServerOption) {
+func WithSubtotalEndpoint() (option flowV1HTTPAPIServerOption) {
 	option = func(server *flowV1HTTPAPIServer) {
 		var (
 			routerGroup *gin.RouterGroup = server.baseRouterGroup.Group(
-				subtotalSubpath,
+				SubtotalSubpath,
 			)
 		)
 
@@ -111,9 +112,8 @@ func (server *flowV1HTTPAPIServer) getSubtotal(ginContext *gin.Context) {
 
 	defer server.handleError(ginContext, &e)
 
-	ginContext.Bind(&s)
-
-	q, e = server.getSubtotalByName(s.Name,
+	q, e = server.getSubtotalByName(
+		ginContext.Query(SubtotalQueryParamName),
 		ginContext.Request.Context(),
 	)
 	if e != nil {
@@ -178,9 +178,8 @@ func (server *flowV1HTTPAPIServer) deleteSubtotal(ginContext *gin.Context) {
 
 	defer server.handleError(ginContext, &e)
 
-	ginContext.Bind(&s)
-
-	q, e = server.getSubtotalByName(s.Name,
+	q, e = server.getSubtotalByName(
+		ginContext.Query(SubtotalQueryParamName),
 		ginContext.Request.Context(),
 		loadSubtotalChildren(),
 	)
