@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/go-resty/resty/v2"
@@ -12,6 +11,7 @@ import (
 
 const (
 	subtotalFlagName = "name"
+	subtotalLogKey   = "subtotal"
 )
 
 var (
@@ -58,6 +58,7 @@ func createSubtotal(c *cli.Context) (e error) {
 
 	response, e = client.R().
 		SetQueryParam(flow.SubtotalQueryParamName, subtotal.Name).
+		SetResult(&subtotal).
 		Get(
 			subtotalURL(),
 		)
@@ -71,9 +72,9 @@ func createSubtotal(c *cli.Context) (e error) {
 		return
 	}
 
-	fmt.Fprintln(buffer,
-		response.String(),
-	)
+	logger.Info().
+		Interface(subtotalLogKey, subtotal).
+		Msg("Subtotal successfully created")
 
 	return
 }

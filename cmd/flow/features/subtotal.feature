@@ -9,7 +9,8 @@ Feature: Subtotal
 
   Scenario: Create Subtotal with no parent
     When we create Subtotal "Profit & Loss" with no parent
-    Then we should see Subtotal "Profit & Loss" with no parent
+    Then we should see message "Subtotal successfully created"
+    And we should see Subtotal "Profit & Loss" with no parent
 
   #Scenario: POST Subtotal with parent and then GET
   #  Given we POST Subtotal "Current Assets" with no parent

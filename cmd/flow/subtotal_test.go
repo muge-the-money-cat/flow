@@ -12,13 +12,17 @@ import (
 	"github.com/muge-the-money-cat/flow/testutils"
 )
 
-type (
-	cliOutputContextKey struct{}
-)
+type subtotalCLIOutput struct {
+	Message  string
+	Subtotal flow.Subtotal
+}
 
 func initialiseSubtotalScenarios(ctx *godog.ScenarioContext) {
 	ctx.Step(`^we create Subtotal "(.+)" with no parent$`,
 		createSubtotalWithNoParent,
+	)
+	ctx.Step(`^we should see message "(.+)"$`,
+		shouldSeeMessage,
 	)
 	ctx.Step(`^we should see Subtotal "(.+)" with no parent$`,
 		shouldSeeSubtotalWithNoParent,
@@ -37,7 +41,8 @@ func createSubtotalWithNoParent(parentContext context.Context, name string) (
 			"--name", name,
 		}
 
-		output []byte
+		output      subtotalCLIOutput
+		outputBytes []byte
 	)
 
 	childContext = parentContext
@@ -47,15 +52,46 @@ func createSubtotalWithNoParent(parentContext context.Context, name string) (
 		return
 	}
 
-	output, e = io.ReadAll(buffer)
+	outputBytes, e = io.ReadAll(buffer)
+	if e != nil {
+		return
+	}
+
+	e = json.Unmarshal(outputBytes, &output)
 	if e != nil {
 		return
 	}
 
 	childContext = context.WithValue(parentContext,
-		cliOutputContextKey{},
-		output,
+		cliOutputMessageContextKey{},
+		output.Message,
 	)
+
+	childContext = context.WithValue(childContext,
+		cliOutputPayloadContextKey{},
+		output.Subtotal,
+	)
+
+	return
+}
+
+func shouldSeeMessage(parentContext context.Context, expected string) (
+	childContext context.Context, e error,
+) {
+	var (
+		actual string = parentContext.
+			Value(cliOutputMessageContextKey{}).(string)
+	)
+
+	childContext = parentContext
+
+	e = testutils.Verify(assert.Equal,
+		expected,
+		actual,
+	)
+	if e != nil {
+		return
+	}
 
 	return
 }
@@ -64,17 +100,15 @@ func shouldSeeSubtotalWithNoParent(parentContext context.Context, name string) (
 	childContext context.Context, e error,
 ) {
 	var (
-		actual   flow.Subtotal
+		actual flow.Subtotal = parentContext.
+			Value(cliOutputPayloadContextKey{}).(flow.Subtotal)
+
 		expected = flow.Subtotal{
 			Name: name,
 		}
-
-		output []byte = parentContext.Value(cliOutputContextKey{}).([]byte)
 	)
 
 	childContext = parentContext
-
-	e = json.Unmarshal(output, &actual)
 
 	actual.ID = flow.NilSubtotalID
 

@@ -2,14 +2,16 @@ package main
 
 import (
 	"io"
-	"log"
 	"net/url"
 	"os"
 
 	"github.com/go-resty/resty/v2"
 	_ "github.com/mattn/go-sqlite3"
-	"github.com/muge-the-money-cat/flow"
+	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
 	"github.com/urfave/cli/v2"
+
+	"github.com/muge-the-money-cat/flow"
 )
 
 const (
@@ -18,7 +20,9 @@ const (
 
 var (
 	client *resty.Client = resty.New()
-	buffer io.ReadWriter
+
+	logger zerolog.Logger
+	writer io.Writer
 
 	serverAddress string
 )
@@ -30,11 +34,11 @@ func main() {
 
 	// TODO: set serverAddress
 
-	buffer = os.Stdout
+	writer = os.Stderr
 
 	e = run(os.Args)
 	if e != nil {
-		log.Fatalln(e)
+		log.Fatal().Err(e).Send()
 	}
 
 	return
@@ -51,9 +55,11 @@ func run(args []string) (e error) {
 		}
 	)
 
+	logger = zerolog.New(writer)
+
 	e = app.Run(args)
 	if e != nil {
-		return
+		logger.Fatal().Err(e).Send()
 	}
 
 	return

@@ -2,9 +2,12 @@ package main
 
 import (
 	"bytes"
+	"io"
+	"os"
 	"testing"
 
 	"github.com/cucumber/godog"
+	"github.com/rs/zerolog"
 
 	"github.com/muge-the-money-cat/flow"
 	"github.com/muge-the-money-cat/flow/testutils"
@@ -12,6 +15,15 @@ import (
 
 const (
 	testServerAddress = "127.78.88.89:8081"
+)
+
+var (
+	buffer *bytes.Buffer
+)
+
+type (
+	cliOutputMessageContextKey struct{}
+	cliOutputPayloadContextKey struct{}
 )
 
 func TestFlowV1CLI(t *testing.T) {
@@ -42,6 +54,11 @@ func TestFlowV1CLI(t *testing.T) {
 	}
 
 	buffer = new(bytes.Buffer)
+
+	writer = io.MultiWriter(
+		zerolog.ConsoleWriter{Out: os.Stderr},
+		buffer,
+	)
 
 	if testSuite.Run() != 0 {
 		t.Fatal()
