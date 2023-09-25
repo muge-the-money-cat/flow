@@ -101,3 +101,11 @@ func endpointURL(subpath string) string {
 
 	return base.JoinPath(subpath).String()
 }
+
+func prefixFlag(flag string) string {
+	const (
+		flagPrefix = "--"
+	)
+
+	return flagPrefix + flag
+}

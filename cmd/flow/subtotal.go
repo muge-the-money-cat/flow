@@ -10,19 +10,21 @@ import (
 )
 
 const (
-	subtotalFlagName = "name"
-	subtotalLogKey   = "subtotal"
+	subtotalCommandName       = "subtotal"
+	subtotalCreateCommandName = "create"
+	subtotalNameFlag          = "name"
+	subtotalLogKey            = "subtotal"
 )
 
 var (
 	subtotalCommand = &cli.Command{
-		Name: "subtotal",
+		Name: subtotalCommandName,
 		Subcommands: []*cli.Command{
 			{
-				Name: "create",
+				Name: subtotalCreateCommandName,
 				Flags: []cli.Flag{
 					&cli.StringFlag{
-						Name:     subtotalFlagName,
+						Name:     subtotalNameFlag,
 						Required: true,
 					},
 				},
@@ -35,7 +37,7 @@ var (
 func createSubtotal(c *cli.Context) (e error) {
 	var (
 		subtotal = flow.Subtotal{
-			Name: c.String(subtotalFlagName),
+			Name: c.String(subtotalNameFlag),
 		}
 
 		response *resty.Response

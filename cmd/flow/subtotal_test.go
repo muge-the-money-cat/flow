@@ -36,9 +36,9 @@ func createSubtotalWithNoParent(parentContext context.Context, name string) (
 ) {
 	var (
 		args = []string{appName,
-			"subtotal",
-			"create",
-			"--name", name,
+			subtotalCommandName,
+			subtotalCreateCommandName,
+			prefixFlag(subtotalNameFlag), name,
 		}
 
 		output      subtotalCLIOutput
