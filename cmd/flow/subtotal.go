@@ -17,21 +17,11 @@ const (
 )
 
 var (
-	subtotalCommand = &cli.Command{
-		Name: subtotalCommandName,
-		Subcommands: []*cli.Command{
-			{
-				Name: subtotalCreateCommandName,
-				Flags: []cli.Flag{
-					&cli.StringFlag{
-						Name:     subtotalNameFlag,
-						Required: true,
-					},
-				},
-				Action: createSubtotal,
-			},
-		},
-	}
+	subtotalCommand *cli.Command = command(subtotalCommandName,
+		subcommand(subtotalCreateCommandName, createSubtotal,
+			stringFlag(subtotalNameFlag, true),
+		),
+	)
 )
 
 func createSubtotal(c *cli.Context) (e error) {
