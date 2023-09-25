@@ -5,10 +5,10 @@ import (
 	"net/url"
 	"os"
 
+	"github.com/gin-gonic/gin"
 	"github.com/go-resty/resty/v2"
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/rs/zerolog"
-	"github.com/rs/zerolog/log"
 	"github.com/urfave/cli/v2"
 
 	"github.com/muge-the-money-cat/flow"
@@ -19,12 +19,15 @@ const (
 )
 
 var (
-	client *resty.Client = resty.New()
+	client *resty.Client  = resty.New()
+	logger zerolog.Logger = zerolog.New(writer)
+	writer io.Writer      = zerolog.ConsoleWriter{Out: os.Stderr}
 
-	logger zerolog.Logger
-	writer io.Writer
-
-	serverAddress string
+	// FIXME: make configurable
+	driverName    string = "sqlite3"
+	serverAddress string = "127.78.88.89:8081"
+	sourceName    string = "file:/tmp/flow?cache=shared&_fk=1"
+	urlScheme     string = "http"
 )
 
 func main() {
@@ -32,13 +35,23 @@ func main() {
 		e error
 	)
 
-	// TODO: set serverAddress
+	defer die(&e)
 
-	writer = os.Stderr
+	gin.SetMode(gin.ReleaseMode)
+
+	_, e = flow.NewFlowV1HTTPAPIServer(
+		serverAddress,
+		driverName,
+		sourceName,
+		flow.WithSubtotalEndpoint(),
+	)
+	if e != nil {
+		return
+	}
 
 	e = run(os.Args)
 	if e != nil {
-		log.Fatal().Err(e).Send()
+		return
 	}
 
 	return
@@ -59,6 +72,18 @@ func run(args []string) (e error) {
 
 	e = app.Run(args)
 	if e != nil {
+		return
+	}
+
+	return
+}
+
+func die(pointer *error) {
+	var (
+		e error = *pointer
+	)
+
+	if e != nil {
 		logger.Fatal().Err(e).Send()
 	}
 
@@ -68,7 +93,7 @@ func run(args []string) (e error) {
 func endpointURL(subpath string) string {
 	var (
 		base = &url.URL{
-			Scheme: "http", // FIXME
+			Scheme: urlScheme,
 			Host:   serverAddress,
 			Path:   flow.BasePathV1,
 		}

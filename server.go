@@ -66,7 +66,7 @@ func (server *flowV1HTTPAPIServer) initialiseEntClient(
 }
 
 func (server *flowV1HTTPAPIServer) initialiseGinEngine() {
-	server.ginEngine = gin.Default()
+	server.ginEngine = gin.New()
 
 	server.baseRouterGroup = server.ginEngine.Group(BasePathV1)
 

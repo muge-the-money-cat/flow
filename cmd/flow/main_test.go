@@ -13,10 +13,6 @@ import (
 	"github.com/muge-the-money-cat/flow/testutils"
 )
 
-const (
-	testServerAddress = "127.78.88.89:8081"
-)
-
 var (
 	buffer *bytes.Buffer
 )
@@ -40,8 +36,6 @@ func TestFlowV1CLI(t *testing.T) {
 
 		e error
 	)
-
-	serverAddress = testServerAddress
 
 	_, e = flow.NewFlowV1HTTPAPIServer(
 		serverAddress,
