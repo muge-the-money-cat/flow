@@ -20,7 +20,7 @@ const (
 
 var (
 	client *resty.Client  = resty.New()
-	logger zerolog.Logger = zerolog.New(writer)
+	logger zerolog.Logger = zerolog.New(writer).With().Timestamp().Logger()
 	writer io.Writer      = zerolog.ConsoleWriter{Out: os.Stderr}
 
 	// FIXME: make configurable
@@ -68,7 +68,7 @@ func run(args []string) (e error) {
 		}
 	)
 
-	logger = zerolog.New(writer)
+	logger = zerolog.New(writer).With().Timestamp().Logger()
 
 	e = app.Run(args)
 	if e != nil {
