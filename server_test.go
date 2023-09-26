@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/cucumber/godog"
+	"github.com/gin-gonic/gin"
 	"github.com/go-resty/resty/v2"
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/stretchr/testify/assert"
@@ -34,7 +35,7 @@ func TestFlowV1HTTPAPIServer(t *testing.T) {
 		e error
 	)
 
-	_, e = NewFlowV1HTTPAPIServer(
+	_, e = NewFlowV1HTTPAPIServer(gin.Default,
 		testutils.TestServerAddress,
 		entDriverName,
 		entSourceName,

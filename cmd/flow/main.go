@@ -39,7 +39,7 @@ func main() {
 
 	gin.SetMode(gin.ReleaseMode)
 
-	_, e = flow.NewFlowV1HTTPAPIServer(
+	_, e = flow.NewFlowV1HTTPAPIServer(gin.New,
 		serverAddress,
 		driverName,
 		sourceName,

@@ -21,7 +21,8 @@ type flowV1HTTPAPIServer struct {
 	baseRouterGroup *gin.RouterGroup
 }
 
-func NewFlowV1HTTPAPIServer(address, entDriverName, entSourceName string,
+func NewFlowV1HTTPAPIServer(constructor ginEngineConstructor,
+	address, entDriverName, entSourceName string,
 	options ...flowV1HTTPAPIServerOption,
 ) (
 	server *flowV1HTTPAPIServer, e error,
@@ -33,7 +34,7 @@ func NewFlowV1HTTPAPIServer(address, entDriverName, entSourceName string,
 		return
 	}
 
-	server.initialiseGinEngine()
+	server.initialiseGinEngine(constructor)
 
 	server.applyOptions(options)
 
@@ -65,8 +66,10 @@ func (server *flowV1HTTPAPIServer) initialiseEntClient(
 	return
 }
 
-func (server *flowV1HTTPAPIServer) initialiseGinEngine() {
-	server.ginEngine = gin.New()
+func (server *flowV1HTTPAPIServer) initialiseGinEngine(
+	constructor ginEngineConstructor,
+) {
+	server.ginEngine = constructor()
 
 	server.baseRouterGroup = server.ginEngine.Group(BasePathV1)
 
@@ -133,5 +136,7 @@ func (*flowV1HTTPAPIServer) handleError(c *gin.Context, pointer *error) {
 
 	return
 }
+
+type ginEngineConstructor func() *gin.Engine
 
 type flowV1HTTPAPIServerOption func(*flowV1HTTPAPIServer)

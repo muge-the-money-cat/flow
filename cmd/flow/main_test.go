@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/cucumber/godog"
+	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog"
 
 	"github.com/muge-the-money-cat/flow"
@@ -37,7 +38,7 @@ func TestFlowV1CLI(t *testing.T) {
 		e error
 	)
 
-	_, e = flow.NewFlowV1HTTPAPIServer(
+	_, e = flow.NewFlowV1HTTPAPIServer(gin.Default,
 		serverAddress,
 		driverName,
 		sourceName,
