@@ -12,12 +12,11 @@ Feature: Subtotal
     Then we should see message "Subtotal successfully created"
     And we should see Subtotal "Profit & Loss" with no parent
 
-  #Scenario: POST Subtotal with parent and then GET
-  #  Given we POST Subtotal "Current Assets" with no parent
-  #  When we POST Subtotal "Cash" with parent "Current Assets"
-  #  And we GET Subtotal "Cash"
-  #  Then we should see HTTP response status 200
-  #  And we should see Subtotal "Cash" with parent "Current Assets"
+  Scenario: Create Subtotal with parent
+    Given we create Subtotal "Current Assets" with no parent
+    When we create Subtotal "Cash" with parent "Current Assets"
+    Then we should see message "Subtotal successfully created"
+    And we should see Subtotal "Cash" with parent "Current Assets"
 
   #Scenario: POST Subtotal with same name as existing
   #  Given we POST Subtotal "Liabilities" with no parent

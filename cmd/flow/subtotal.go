@@ -12,14 +12,16 @@ import (
 const (
 	subtotalCommandName       = "subtotal"
 	subtotalCreateCommandName = "create"
-	subtotalNameFlag          = "name"
 	subtotalLogKey            = "subtotal"
+	subtotalNameFlag          = "name"
+	subtotalParentNameFlag    = "parent"
 )
 
 var (
 	subtotalCommand *cli.Command = command(subtotalCommandName,
 		subcommand(subtotalCreateCommandName, createSubtotal,
 			stringFlag(subtotalNameFlag, true),
+			stringFlag(subtotalParentNameFlag, false),
 		),
 	)
 )
@@ -27,7 +29,8 @@ var (
 func createSubtotal(c *cli.Context) (e error) {
 	var (
 		subtotal = flow.Subtotal{
-			Name: c.String(subtotalNameFlag),
+			Name:       c.String(subtotalNameFlag),
+			ParentName: c.String(subtotalParentNameFlag),
 		}
 
 		response *resty.Response

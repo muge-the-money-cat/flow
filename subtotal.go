@@ -12,10 +12,10 @@ import (
 
 const (
 	NilSubtotalID          = 0
+	NilSubtotalName        = ""
+	NilSubtotalParentName  = ""
 	SubtotalQueryParamName = "name"
 	SubtotalSubpath        = "subtotal"
-	nilSubtotalName        = ""
-	nilSubtotalParentName  = ""
 )
 
 type Subtotal struct {
@@ -80,7 +80,7 @@ func (server *flowV1HTTPAPIServer) postSubtotal(ginContext *gin.Context) {
 	create = server.entClient.Subtotal.Create().
 		SetName(s.Name)
 
-	if s.ParentName != nilSubtotalParentName {
+	if s.ParentName != NilSubtotalParentName {
 		q, e = server.getSubtotalByName(s.ParentName,
 			ginContext.Request.Context(),
 		)
@@ -142,11 +142,11 @@ func (server *flowV1HTTPAPIServer) patchSubtotal(ginContext *gin.Context) {
 
 	update = server.entClient.Subtotal.UpdateOneID(s.ID)
 
-	if s.Name != nilSubtotalName {
+	if s.Name != NilSubtotalName {
 		update = update.SetName(s.Name)
 	}
 
-	if s.ParentName != nilSubtotalParentName {
+	if s.ParentName != NilSubtotalParentName {
 		q, e = server.getSubtotalByName(s.ParentName,
 			ginContext.Request.Context(),
 		)

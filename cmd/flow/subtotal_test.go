@@ -27,11 +27,19 @@ func initialiseSubtotalScenarios(ctx *godog.ScenarioContext) {
 	ctx.Step(`^we should see Subtotal "(.+)" with no parent$`,
 		shouldSeeSubtotalWithNoParent,
 	)
+	ctx.Step(`^we create Subtotal "(.+)" with parent "(.+)"$`,
+		createSubtotalWithParent,
+	)
+	ctx.Step(`^we should see Subtotal "(.+)" with parent "(.+)"$`,
+		shouldSeeSubtotalWithParent,
+	)
 
 	return
 }
 
-func createSubtotalWithNoParent(parentContext context.Context, name string) (
+func createSubtotalWithParent(parentContext context.Context,
+	name, parentName string,
+) (
 	childContext context.Context, e error,
 ) {
 	var (
@@ -46,6 +54,13 @@ func createSubtotalWithNoParent(parentContext context.Context, name string) (
 	)
 
 	childContext = parentContext
+
+	if parentName != flow.NilSubtotalParentName {
+		args = append(args,
+			prefixFlag(subtotalParentNameFlag),
+			parentName,
+		)
+	}
 
 	e = run(args)
 	if e != nil {
@@ -75,6 +90,17 @@ func createSubtotalWithNoParent(parentContext context.Context, name string) (
 	return
 }
 
+func createSubtotalWithNoParent(parentContext context.Context, name string) (
+	childContext context.Context, e error,
+) {
+	childContext, e = createSubtotalWithParent(parentContext,
+		name,
+		flow.NilSubtotalParentName,
+	)
+
+	return
+}
+
 func shouldSeeMessage(parentContext context.Context, expected string) (
 	childContext context.Context, e error,
 ) {
@@ -96,7 +122,9 @@ func shouldSeeMessage(parentContext context.Context, expected string) (
 	return
 }
 
-func shouldSeeSubtotalWithNoParent(parentContext context.Context, name string) (
+func shouldSeeSubtotalWithParent(parentContext context.Context,
+	name, parentName string,
+) (
 	childContext context.Context, e error,
 ) {
 	var (
@@ -104,7 +132,8 @@ func shouldSeeSubtotalWithNoParent(parentContext context.Context, name string) (
 			Value(cliOutputPayloadContextKey{}).(flow.Subtotal)
 
 		expected = flow.Subtotal{
-			Name: name,
+			Name:       name,
+			ParentName: parentName,
 		}
 	)
 
@@ -119,6 +148,17 @@ func shouldSeeSubtotalWithNoParent(parentContext context.Context, name string) (
 	if e != nil {
 		return
 	}
+
+	return
+}
+
+func shouldSeeSubtotalWithNoParent(parentContext context.Context, name string) (
+	childContext context.Context, e error,
+) {
+	childContext, e = shouldSeeSubtotalWithParent(parentContext,
+		name,
+		flow.NilSubtotalParentName,
+	)
 
 	return
 }

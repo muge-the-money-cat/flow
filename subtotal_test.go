@@ -108,7 +108,7 @@ func postSubtotalWithParent(parentContext context.Context,
 func postSubtotalWithNoParent(parentContext context.Context, name string) (
 	context.Context, error,
 ) {
-	return postSubtotalWithParent(parentContext, name, nilSubtotalParentName)
+	return postSubtotalWithParent(parentContext, name, NilSubtotalParentName)
 }
 
 func shouldSeeSubtotalWithParent(parentContext context.Context,
@@ -147,7 +147,7 @@ func shouldSeeSubtotalWithNoParent(parentContext context.Context, name string) (
 ) {
 	return shouldSeeSubtotalWithParent(parentContext,
 		name,
-		nilSubtotalParentName,
+		NilSubtotalParentName,
 	)
 }
 
