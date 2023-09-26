@@ -13,6 +13,7 @@ import (
 const (
 	subtotalCommandName       = "subtotal"
 	subtotalCreateCommandName = "create"
+	subtotalDeleteCommandName = "delete"
 	subtotalLogKey            = "subtotal"
 	subtotalNameFlag          = "name"
 	subtotalParentNameFlag    = "parent"
@@ -23,6 +24,9 @@ var (
 		subcommand(subtotalCreateCommandName, createSubtotal,
 			stringFlag(subtotalNameFlag, true),
 			stringFlag(subtotalParentNameFlag, false),
+		),
+		subcommand(subtotalDeleteCommandName, deleteSubtotal,
+			stringFlag(subtotalNameFlag, true),
 		),
 	)
 )
@@ -91,6 +95,47 @@ func createSubtotal(c *cli.Context) (e error) {
 	logger.Info().
 		Interface(subtotalLogKey, subtotal).
 		Msg("Subtotal successfully created")
+
+	return
+}
+
+func deleteSubtotal(c *cli.Context) (e error) {
+	var (
+		response *resty.Response
+		subtotal flow.Subtotal
+	)
+
+	response, subtotal, e = getSubtotalByName(
+		c.String(subtotalNameFlag),
+	)
+	if e != nil {
+		return
+	}
+
+	if response.StatusCode() != http.StatusOK {
+		// TODO
+
+		return
+	}
+
+	response, e = client.R().
+		SetQueryParam(flow.SubtotalQueryParamName, subtotal.Name).
+		Delete(
+			subtotalURL(),
+		)
+	if e != nil {
+		return
+	}
+
+	if response.StatusCode() != http.StatusOK {
+		// TODO
+
+		return
+	}
+
+	logger.Info().
+		Interface(subtotalLogKey, subtotal).
+		Msg("Subtotal successfully deleted")
 
 	return
 }

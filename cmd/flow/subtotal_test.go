@@ -2,8 +2,6 @@ package main
 
 import (
 	"context"
-	"encoding/json"
-	"io"
 
 	"github.com/cucumber/godog"
 	"github.com/stretchr/testify/assert"
@@ -11,12 +9,6 @@ import (
 	"github.com/muge-the-money-cat/flow"
 	"github.com/muge-the-money-cat/flow/testutils"
 )
-
-type subtotalCLIOutput struct {
-	Error    string
-	Message  string
-	Subtotal flow.Subtotal
-}
 
 func initialiseSubtotalScenarios(ctx *godog.ScenarioContext) {
 	ctx.Step(`^we create Subtotal "(.+)" with no parent$`,
@@ -37,6 +29,9 @@ func initialiseSubtotalScenarios(ctx *godog.ScenarioContext) {
 	ctx.Step(`^we should see error "(.+)"$`,
 		shouldSeeError,
 	)
+	ctx.Step(`^we delete Subtotal "(.+)"$`,
+		_deleteSubtotal,
+	)
 
 	return
 }
@@ -52,9 +47,6 @@ func createSubtotalWithParent(parentContext context.Context,
 			subtotalCreateCommandName,
 			prefixFlag(subtotalNameFlag), name,
 		}
-
-		output      subtotalCLIOutput
-		outputBytes []byte
 	)
 
 	childContext = parentContext
@@ -71,30 +63,10 @@ func createSubtotalWithParent(parentContext context.Context,
 		return
 	}
 
-	outputBytes, e = io.ReadAll(buffer)
+	childContext, e = parseCLIOutput(parentContext)
 	if e != nil {
 		return
 	}
-
-	e = json.Unmarshal(outputBytes, &output)
-	if e != nil {
-		return
-	}
-
-	childContext = context.WithValue(parentContext,
-		cliOutputErrorContextKey{},
-		output.Error,
-	)
-
-	childContext = context.WithValue(childContext,
-		cliOutputMessageContextKey{},
-		output.Message,
-	)
-
-	childContext = context.WithValue(childContext,
-		cliOutputPayloadContextKey{},
-		output.Subtotal,
-	)
 
 	return
 }
@@ -181,6 +153,32 @@ func shouldSeeSubtotalWithNoParent(parentContext context.Context, name string) (
 		name,
 		flow.NilSubtotalParentName,
 	)
+
+	return
+}
+
+func _deleteSubtotal(parentContext context.Context, name string) (
+	childContext context.Context, e error,
+) {
+	var (
+		args = []string{appName,
+			subtotalCommandName,
+			subtotalDeleteCommandName,
+			prefixFlag(subtotalNameFlag), name,
+		}
+	)
+
+	childContext = parentContext
+
+	e = run(args)
+	if e != nil {
+		return
+	}
+
+	childContext, e = parseCLIOutput(parentContext)
+	if e != nil {
+		return
+	}
 
 	return
 }
