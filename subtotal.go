@@ -21,7 +21,7 @@ const (
 type Subtotal struct {
 	ID         int
 	Name       string
-	ParentName string
+	ParentName string `json:",omitempty"`
 }
 
 func newSubtotalFromEntSubtotal(q *ent.Subtotal) (s Subtotal) {

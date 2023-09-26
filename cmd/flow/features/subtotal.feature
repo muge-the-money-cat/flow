@@ -1,12 +1,4 @@
 Feature: Subtotal
-  #Scenario: GET non-existent Subtotal
-  #  When we GET Subtotal "Assets"
-  #  Then we should see HTTP response status 404
-
-  #Scenario: POST Subtotal
-  #  When we POST Subtotal "Balance Sheet" with no parent
-  #  Then we should see HTTP response status 204
-
   Scenario: Create Subtotal with no parent
     When we create Subtotal "Profit & Loss" with no parent
     Then we should see message "Subtotal successfully created"
@@ -18,10 +10,16 @@ Feature: Subtotal
     Then we should see message "Subtotal successfully created"
     And we should see Subtotal "Cash" with parent "Current Assets"
 
-  #Scenario: POST Subtotal with same name as existing
-  #  Given we POST Subtotal "Liabilities" with no parent
-  #  When we POST Subtotal "Liabilities" with no parent
-  #  Then we should see HTTP response status 409
+  Scenario: Create Subtotal with same name as existing
+    Given we create Subtotal "Balance Sheet" with no parent
+    And we create Subtotal "Liabilities" with parent "Balance Sheet"
+    When we create Subtotal "Liabilities" with no parent
+    Then we should see error "Subtotal with same name exists"
+    And we should see Subtotal "Liabilities" with parent "Balance Sheet"
+
+  Scenario: Create Subtotal with non-existent parent
+    When we create Subtotal "Land" with parent "Assets"
+    Then we should see error "Parent Subtotal does not exist"
 
   #Scenario: PATCH Subtotal
   #  Given we POST Subtotal "Discounts" with no parent

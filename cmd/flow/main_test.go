@@ -19,6 +19,7 @@ var (
 )
 
 type (
+	cliOutputErrorContextKey   struct{}
 	cliOutputMessageContextKey struct{}
 	cliOutputPayloadContextKey struct{}
 )

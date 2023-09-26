@@ -13,6 +13,7 @@ import (
 )
 
 type subtotalCLIOutput struct {
+	Error    string
 	Message  string
 	Subtotal flow.Subtotal
 }
@@ -32,6 +33,9 @@ func initialiseSubtotalScenarios(ctx *godog.ScenarioContext) {
 	)
 	ctx.Step(`^we should see Subtotal "(.+)" with parent "(.+)"$`,
 		shouldSeeSubtotalWithParent,
+	)
+	ctx.Step(`^we should see error "(.+)"$`,
+		shouldSeeError,
 	)
 
 	return
@@ -78,6 +82,11 @@ func createSubtotalWithParent(parentContext context.Context,
 	}
 
 	childContext = context.WithValue(parentContext,
+		cliOutputErrorContextKey{},
+		output.Error,
+	)
+
+	childContext = context.WithValue(childContext,
 		cliOutputMessageContextKey{},
 		output.Message,
 	)
@@ -101,12 +110,13 @@ func createSubtotalWithNoParent(parentContext context.Context, name string) (
 	return
 }
 
-func shouldSeeMessage(parentContext context.Context, expected string) (
+func shouldSee(parentContext context.Context, expected string,
+	actualContextKey any,
+) (
 	childContext context.Context, e error,
 ) {
 	var (
-		actual string = parentContext.
-			Value(cliOutputMessageContextKey{}).(string)
+		actual string = parentContext.Value(actualContextKey).(string)
 	)
 
 	childContext = parentContext
@@ -122,19 +132,31 @@ func shouldSeeMessage(parentContext context.Context, expected string) (
 	return
 }
 
+func shouldSeeMessage(parentContext context.Context, expected string) (
+	childContext context.Context, e error,
+) {
+	return shouldSee(parentContext, expected, cliOutputMessageContextKey{})
+}
+
+func shouldSeeError(parentContext context.Context, expected string) (
+	childContext context.Context, e error,
+) {
+	return shouldSee(parentContext, expected, cliOutputErrorContextKey{})
+}
+
 func shouldSeeSubtotalWithParent(parentContext context.Context,
 	name, parentName string,
 ) (
 	childContext context.Context, e error,
 ) {
 	var (
-		actual flow.Subtotal = parentContext.
-			Value(cliOutputPayloadContextKey{}).(flow.Subtotal)
-
 		expected = flow.Subtotal{
 			Name:       name,
 			ParentName: parentName,
 		}
+
+		actual flow.Subtotal = parentContext.
+			Value(cliOutputPayloadContextKey{}).(flow.Subtotal)
 	)
 
 	childContext = parentContext

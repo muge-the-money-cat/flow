@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/go-resty/resty/v2"
@@ -28,6 +29,13 @@ var (
 
 func createSubtotal(c *cli.Context) (e error) {
 	var (
+		subtotalErrorConflict error = fmt.Errorf(
+			"Subtotal with same name exists",
+		)
+		subtotalErrorNotFound error = fmt.Errorf(
+			"Parent Subtotal does not exist",
+		)
+
 		subtotal = flow.Subtotal{
 			Name:       c.String(subtotalNameFlag),
 			ParentName: c.String(subtotalParentNameFlag),
@@ -45,18 +53,31 @@ func createSubtotal(c *cli.Context) (e error) {
 		return
 	}
 
-	if response.StatusCode() != http.StatusNoContent {
-		// TODO
+	switch response.StatusCode() {
+	case http.StatusNotFound:
+		logger.Error().
+			Err(subtotalErrorNotFound).
+			Send()
 
 		return
+
+	case http.StatusConflict:
+		_, subtotal, e = getSubtotalByName(subtotal.Name)
+		if e != nil {
+			return
+		}
+
+		logger.Error().
+			Err(subtotalErrorConflict).
+			Interface(subtotalLogKey, subtotal).
+			Send()
+
+		return
+
+		// TODO: more cases
 	}
 
-	response, e = client.R().
-		SetQueryParam(flow.SubtotalQueryParamName, subtotal.Name).
-		SetResult(&subtotal).
-		Get(
-			subtotalURL(),
-		)
+	response, subtotal, e = getSubtotalByName(subtotal.Name)
 	if e != nil {
 		return
 	}
@@ -70,6 +91,22 @@ func createSubtotal(c *cli.Context) (e error) {
 	logger.Info().
 		Interface(subtotalLogKey, subtotal).
 		Msg("Subtotal successfully created")
+
+	return
+}
+
+func getSubtotalByName(name string) (
+	response *resty.Response, subtotal flow.Subtotal, e error,
+) {
+	response, e = client.R().
+		SetQueryParam(flow.SubtotalQueryParamName, name).
+		SetResult(&subtotal).
+		Get(
+			subtotalURL(),
+		)
+	if e != nil {
+		return
+	}
 
 	return
 }

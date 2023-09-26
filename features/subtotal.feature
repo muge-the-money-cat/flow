@@ -28,6 +28,10 @@ Feature: Subtotal
     When we POST Subtotal "Liabilities" with no parent
     Then we should see HTTP response status 409
 
+  Scenario: POST Subtotal with non-existent parent
+    When we POST Subtotal "Land" with parent "Assets"
+    Then we should see HTTP response status 404
+
   Scenario: PATCH Subtotal
     Given we POST Subtotal "Discounts" with no parent
     When we PATCH Subtotal "Discounts" with new name "Sales Discounts"
