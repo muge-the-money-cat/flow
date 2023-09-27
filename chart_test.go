@@ -22,7 +22,10 @@ func initialiseChartScenarios(ctx *godog.ScenarioContext) {
 		getChart,
 	)
 	ctx.Step(`^we should see Chart with edge "(.+)" -> "(.+)"$`,
-		shouldSeeChartWithEdge,
+		shouldSeeChartWithEdgeToSubtotal,
+	)
+	ctx.Step(`^we should see Chart with edge "(.+)" -> Account "(.+)"$`,
+		shouldSeeChartWithEdgeToAccount,
 	)
 
 	return
@@ -59,10 +62,18 @@ func getChart(parentContext context.Context, subtotalName string) (
 	return
 }
 
-func shouldSeeChartWithEdge(parentContext context.Context, from, to string) (
+func shouldSeeChartWithEdge(parentContext context.Context, from, to string,
+	toAccount bool,
+) (
 	childContext context.Context, e error,
 ) {
 	var (
+		expected = ChartEdge{
+			Tail:          from,
+			Head:          to,
+			HeadIsAccount: toAccount,
+		}
+
 		actual Chart = parentContext.Value(
 			httpResponseParsedContextKey{},
 		).(Chart)
@@ -72,14 +83,27 @@ func shouldSeeChartWithEdge(parentContext context.Context, from, to string) (
 
 	e = testutils.Verify(assert.Contains,
 		actual.Edges,
-		ChartEdge{
-			Tail: from,
-			Head: to,
-		},
+		expected,
 	)
 	if e != nil {
 		return
 	}
 
 	return
+}
+
+func shouldSeeChartWithEdgeToSubtotal(parentContext context.Context,
+	from, to string,
+) (
+	childContext context.Context, e error,
+) {
+	return shouldSeeChartWithEdge(parentContext, from, to, false)
+}
+
+func shouldSeeChartWithEdgeToAccount(parentContext context.Context,
+	from, to string,
+) (
+	childContext context.Context, e error,
+) {
+	return shouldSeeChartWithEdge(parentContext, from, to, true)
 }

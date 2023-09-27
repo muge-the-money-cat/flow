@@ -18,11 +18,12 @@ type Chart struct {
 	Edges []ChartEdge
 }
 
-func (c *Chart) appendEdge(tail, head string) {
+func (c *Chart) appendEdge(tail, head string, headIsAccount bool) {
 	c.Edges = append(c.Edges,
 		ChartEdge{
-			Tail: tail,
-			Head: head,
+			Tail:          tail,
+			Head:          head,
+			HeadIsAccount: headIsAccount,
 		},
 	)
 
@@ -36,6 +37,8 @@ type ChartEdge struct {
 	// > the vertices x and y are called the endpoints of the edge,
 	// > x the tail of the edge and y the head of the edge.
 	// (https://en.wikipedia.org/wiki/Graph_theory#Directed_graph)
+
+	HeadIsAccount bool
 }
 
 func withChartEndpoint() (option flowV1HTTPAPIServerOption) {
@@ -104,14 +107,14 @@ func (server *flowV1HTTPAPIServer) populateChart(chart *Chart,
 	}
 
 	for _, r = range q.Edges.Children {
-		chart.appendEdge(q.Name, r.Name)
+		chart.appendEdge(q.Name, r.Name, false)
 
 		server.populateChart(chart, r.Name, ctx)
 		// recursive depth-first traversal
 	}
 
 	for _, a = range q.Edges.Accounts {
-		chart.appendEdge(q.Name, a.Name)
+		chart.appendEdge(q.Name, a.Name, true)
 	}
 
 	return
